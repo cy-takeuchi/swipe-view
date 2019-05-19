@@ -23,7 +23,6 @@ jQuery.noConflict();
 
     class Form {
         constructor() {
-            this.length = 0;
             this.groupList = [];
         };
 
@@ -41,7 +40,8 @@ jQuery.noConflict();
                 let id = layout[i].fields[0].elementId;
                 let obj = {
                     code: code,
-                    type: type
+                    type: type,
+                    empty: true
                 }
 
                 if (type === 'SPACER') {
@@ -97,12 +97,26 @@ jQuery.noConflict();
             }
         }
 
-        passiveFirst() {
+        // 初期表示用
+        first() {
             // 最初のグループリストは表示するから開始は1
-            for (let i = 1; i < this.groupList.length; i++) {
+            // 未入力項目、全項目は外すから -2
+            for (let i = 1; i < this.groupList.length - 2; i++) {
                 let group = this.groupList[i];
                 for (let j = 0; j < group.length; j++) {
                     let field = group[j];
+                    kintone.mobile.app.record.setFieldShown(field.code, false);
+                }
+            }
+        }
+
+        // 未入力項目用
+        noInputs(num) {
+            for (let i = 0; i < this.groupList[num].length; i++) {
+                let field = this.groupList[num][i];
+                if (field.empty === true) {
+                    kintone.mobile.app.record.setFieldShown(field.code, true);
+                } else if (field.empty === false) {
                     kintone.mobile.app.record.setFieldShown(field.code, false);
                 }
             }
@@ -123,8 +137,7 @@ jQuery.noConflict();
         }
 
         setMax(max) {
-            // 「+2」は未入力、全件分
-            this.max = max + 2;
+            this.max = max;
         }
 
         getPage() {
@@ -196,7 +209,7 @@ jQuery.noConflict();
             list.setMax(form.groupList.length);
 
             list.show(el);
-            form.passiveFirst();
+            form.first();
             list.init();
         });
 
@@ -204,29 +217,40 @@ jQuery.noConflict();
             let before = pager.getPage();
             let current = $(event.currentTarget).index();
 
-            list.passive(before);
-            form.passive(before);
+            if (current === pager.getMax() - 2) { // 未入力項目
+                form.noInputs(current);
+            } else if (current === pager.getMax() - 1) { // 全項目
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
 
+            list.passive(before);
             list.active(current);
-            form.active(current);
 
             pager.setPage(current);
         });
-
 
         $(`div#${swipeSpaceId}`).hammer().bind('swiperight', () => {
             console.log('swipe right');
             let before = pager.getPage();
             let current = before + 1;
-            if (current >= pager.getMax() - 2) {
+            if (current >= pager.getMax()) {
                 return;
             }
 
-            list.passive(before);
-            form.passive(before);
+            if (current === pager.getMax() - 2) { // 未入力項目
+                form.noInputs(current);
+            } else if (current === pager.getMax() - 1) { // 全項目
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
 
+            list.passive(before);
             list.active(current);
-            form.active(current);
 
             pager.setPage(current);
         });
@@ -238,11 +262,17 @@ jQuery.noConflict();
                 return;
             }
 
-            list.passive(before);
-            form.passive(before);
+            if (current === pager.getMax() - 2) { // 未入力項目
+                form.noInputs(current);
+            } else if (current === pager.getMax() - 1) { // 全項目
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
 
+            list.passive(before);
             list.active(current);
-            form.active(current);
 
             pager.setPage(current);
         });
@@ -254,12 +284,17 @@ jQuery.noConflict();
     ];
     kintone.events.on(changeEvent, (event) => {
         let noInputsNum = form.groupList.length - 2;
-        console.log('noInputsNum', noInputsNum);
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
-        console.log(field, value);
-        console.log(form.grouPlist[noInputsNum]);
-        // ここ
+        for (let i = 0; i < form.groupList[noInputsNum].length; i++) {
+            if (form.groupList[noInputsNum][i].code === fieldCode) {
+                if (value !== '' && value !== undefined) {
+                    form.groupList[noInputsNum][i]['empty'] = false;
+                } else {
+                    form.groupList[noInputsNum][i]['empty'] = true;
+                }
+            }
+        }
     });
 
 })(jQuery);
