@@ -34,40 +34,50 @@ jQuery.noConflict();
             let array = [];
             let all = [];
             for (let i of Object.keys(layout)) {
-                let fields = layout[i].fields;
-                for (let j = 0; j < fields.length; j++) {
-                    let code = fields[j].code;
-                    let type = fields[j].type;
-                    let id = fields[j].elementId;
+                let type = layout[i].type;
+                if (type === 'GROUP') {
                     let obj = {
-                        code: code,
-                        type: type,
+                        code: layout[i].code,
+                        type: layout[i].type,
                         empty: true
                     }
+                    array.push(obj);
+                    all.push(obj);
+                } else if (type === 'ROW') {
+                    let fields = layout[i].fields;
+                    for (let j = 0; j < fields.length; j++) {
+                        let code = fields[j].code;
+                        let type = fields[j].type;
+                        let id = fields[j].elementId;
+                        let obj = {
+                            code: code,
+                            type: type,
+                            empty: true
+                        }
 
-                    if (type === 'SPACER') {
-                        if (id === 'swipe') {
+                        if (type === 'SPACER') {
+                            if (id === 'swipe') {
+                                continue;
+                            }
+                        } else if (type === 'HR') {
                             continue;
                         }
-                    } else if (type === 'HR') {
-                        continue;
-                    }
 
-                    if (type === 'SPACER') {
-                        if (array.length > 0) {
-                            this.groupList.push(array);
-                            array = [];
+                        if (type === 'SPACER') {
+                            if (array.length > 0) {
+                                this.groupList.push(array);
+                                array = [];
+                            }
+                        } else {
+                            array.push(obj);
+                            all.push(obj);
                         }
-                    } else {
-                        array.push(obj);
-                        all.push(obj);
                     }
                 }
             }
 
             if (array.length > 0) {
                 this.groupList.push(array);
-                array = [];
             }
 
             // 未入力を設定
