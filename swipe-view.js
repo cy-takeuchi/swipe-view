@@ -34,31 +34,34 @@ jQuery.noConflict();
             let array = [];
             let all = [];
             for (let i of Object.keys(layout)) {
-                let code = layout[i].fields[0].code;
-                let type = layout[i].fields[0].type;
-                let id = layout[i].fields[0].elementId;
-                let obj = {
-                    code: code,
-                    type: type,
-                    empty: true
-                }
+                let fields = layout[i].fields;
+                for (let j = 0; j < fields.length; j++) {
+                    let code = fields[j].code;
+                    let type = fields[j].type;
+                    let id = fields[j].elementId;
+                    let obj = {
+                        code: code,
+                        type: type,
+                        empty: true
+                    }
 
-                if (type === 'SPACER') {
-                    if (id === 'swipe') {
+                    if (type === 'SPACER') {
+                        if (id === 'swipe') {
+                            continue;
+                        }
+                    } else if (type === 'HR') {
                         continue;
                     }
-                } else if (type === 'HR') {
-                    continue;
-                }
 
-                if (type === 'SPACER') {
-                    if (array.length > 0) {
-                        this.groupList.push(array);
-                        array = [];
+                    if (type === 'SPACER') {
+                        if (array.length > 0) {
+                            this.groupList.push(array);
+                            array = [];
+                        }
+                    } else {
+                        array.push(obj);
+                        all.push(obj);
                     }
-                } else {
-                    array.push(obj);
-                    all.push(obj);
                 }
             }
 
