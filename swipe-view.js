@@ -9,7 +9,6 @@ jQuery.noConflict();
     const appId = kintone.mobile.app.getId();
 
     const swipeSpaceId = 'cy-swipe';
-    //const sliderSpaceId = 'cy-pager';
     const listId = 'cy-ul';
 
     let showSwipeArea = (el) => {
@@ -24,7 +23,7 @@ jQuery.noConflict();
     class Form {
         constructor() {
             this.groupList = [];
-        };
+        }
 
         async getLayout() {
             let res = await kintoneApp.getFormLayout(appId);
@@ -45,7 +44,7 @@ jQuery.noConflict();
                 }
 
                 if (type === 'SPACER') {
-                    if (id === 'swipe' || id === 'pager') {
+                    if (id === 'swipe') {
                         continue;
                     }
                 } else if (type === 'HR') {
