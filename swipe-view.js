@@ -7,6 +7,8 @@ jQuery.noConflict();
     let conn = new kintoneJSSDK.Connection();
     let kintoneApp = new kintoneJSSDK.App(conn);
     const appId = kintone.mobile.app.getId();
+    const subdomain = window.location.hostname.split('.')[0];
+    const localStorageKey = `sv-${subdomain}-${appId}`;
 
     const swipeSpaceId = 'cy-swipe';
     const listId = 'cy-ul';
@@ -208,6 +210,15 @@ jQuery.noConflict();
 
     kintone.events.on(['mobile.app.record.create.show', 'mobile.app.record.edit.show'], (event) => {
         console.log('abc');
+        let record = event.record;
+
+        let localStorageData = localStorage.getItem(localStorageKey);
+        if (localStorageData !== null) {
+            let inputData = JSON.parse(localStorageData);
+            for (let key of Object.keys(inputData)) {
+                //record[key].value = inputData[key];
+            }
+        }
 
         // プラグインの設定値から取得する
         let el = kintone.mobile.app.record.getSpaceElement('pager');
@@ -288,16 +299,21 @@ jQuery.noConflict();
 
             pager.setPage(current);
         });
+
+        return event;
     });
 
     let changeEvent = [
         'mobile.app.record.create.change.ドロップダウン',
         'mobile.app.record.create.change.ユーザー選択',
+        'mobile.app.record.create.change.チェックボックス',
     ];
     kintone.events.on(changeEvent, (event) => {
         let noInputsNum = form.groupList.length - 2;
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
+        let data = {[fieldCode]: value};
+        localStorage.setItem(localStorageKey, JSON.stringify(data));
         for (let i = 0; i < form.groupList[noInputsNum].length; i++) {
             if (form.groupList[noInputsNum][i].code === fieldCode) {
                 if (value !== '' && value !== undefined) {
@@ -309,4 +325,7 @@ jQuery.noConflict();
         }
     });
 
+    kintone.events.on(['mobile.app.record.create.submit.success', 'mobile.app.record.edit.submit.success'], (event) => {
+        localStorage.removeItem(localStorageKey);
+    });
 })(jQuery);
