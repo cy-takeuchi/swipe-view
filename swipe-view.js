@@ -13,6 +13,18 @@ jQuery.noConflict();
     const swipeSpaceId = 'cy-swipe';
     const listId = 'cy-ul';
 
+    let localStorageData = localStorage.getItem(localStorageKey);
+    let localStorageJson = {};
+    if (localStorageData !== null) {
+        localStorageJson = JSON.parse(localStorageData);
+    }
+
+    async function sleep(delay, result) {
+        return new Promise(resolve => {
+          setTimeout(() => resolve(result), delay);
+        });
+      }
+
     let showSwipeArea = (el) => {
         let style = '';
         style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
@@ -32,7 +44,7 @@ jQuery.noConflict();
             return res.layout;
         }
 
-        async grouping(layout) {
+        grouping(layout) {
             let array = [];
             let all = [];
             for (let i of Object.keys(layout)) {
@@ -87,14 +99,6 @@ jQuery.noConflict();
 
             // 全件を設定
             this.groupList.push(all);
-        }
-
-        async parseForm() {
-            let layout = await this.getLayout();
-            console.log('layout', layout);
-
-            await this.grouping(layout);
-            console.log('groupList', this.groupList);
         }
 
         active(num) {
@@ -204,6 +208,25 @@ jQuery.noConflict();
         }
     }
 
+    let restore = (event) => {
+        let noInputsNum = form.groupList.length - 2;
+        let value = event.changes.field.value;
+        let fieldCode = event.type.replace(/.*\./, '');
+
+        localStorageJson[fieldCode] = value;
+        console.log('Change!', fieldCode, value, localStorageJson);
+        localStorage.setItem(localStorageKey, JSON.stringify(localStorageJson));
+        for (let i = 0; i < form.groupList[noInputsNum].length; i++) {
+            if (form.groupList[noInputsNum][i].code === fieldCode) {
+                if (value !== '' && value !== undefined) {
+                    form.groupList[noInputsNum][i]['empty'] = false;
+                } else {
+                    form.groupList[noInputsNum][i]['empty'] = true;
+                }
+            }
+        }
+    }
+
 
 
     let form = new Form();
@@ -212,14 +235,6 @@ jQuery.noConflict();
         console.log('abc');
         let record = event.record;
 
-        let localStorageData = localStorage.getItem(localStorageKey);
-        if (localStorageData !== null) {
-            let inputData = JSON.parse(localStorageData);
-            for (let key of Object.keys(inputData)) {
-                //record[key].value = inputData[key];
-            }
-        }
-
         // プラグインの設定値から取得する
         let el = kintone.mobile.app.record.getSpaceElement('pager');
         showSwipeArea(el);
@@ -227,7 +242,9 @@ jQuery.noConflict();
         let pager = new Pager();
         let list = new List(listId);
 
-        form.parseForm().then(() => {
+        form.getLayout().then((layout) => {
+            form.grouping(layout);
+
             pager.setMax(form.groupList.length);
             list.setMax(form.groupList.length);
 
@@ -235,6 +252,20 @@ jQuery.noConflict();
             form.first();
             list.init();
         });
+
+        if (localStorageData !== null) {
+            $(el).append('<div>反映しますか？</div><span id="ok">OK</span><span id="ng">NG</span>');
+        }
+
+        $(document).on('click', 'span#ok', () => {
+            let record = kintone.mobile.app.record.get();
+            kintone.events.off(changeEvent, restore);
+            for (let key of Object.keys(localStorageJson)) {
+                record.record[key].value = localStorageJson[key];
+            }
+            kintone.mobile.app.record.set(record);
+            kintone.events.on(changeEvent, restore);
+        })
 
         $(document).on('click', `ul#${listId} li`, (event) => {
             let before = pager.getPage();
@@ -308,22 +339,7 @@ jQuery.noConflict();
         'mobile.app.record.create.change.ユーザー選択',
         'mobile.app.record.create.change.チェックボックス',
     ];
-    kintone.events.on(changeEvent, (event) => {
-        let noInputsNum = form.groupList.length - 2;
-        let value = event.changes.field.value;
-        let fieldCode = event.type.replace(/.*\./, '');
-        let data = {[fieldCode]: value};
-        localStorage.setItem(localStorageKey, JSON.stringify(data));
-        for (let i = 0; i < form.groupList[noInputsNum].length; i++) {
-            if (form.groupList[noInputsNum][i].code === fieldCode) {
-                if (value !== '' && value !== undefined) {
-                    form.groupList[noInputsNum][i]['empty'] = false;
-                } else {
-                    form.groupList[noInputsNum][i]['empty'] = true;
-                }
-            }
-        }
-    });
+    kintone.events.on(changeEvent, restore);
 
     kintone.events.on(['mobile.app.record.create.submit.success', 'mobile.app.record.edit.submit.success'], (event) => {
         localStorage.removeItem(localStorageKey);
