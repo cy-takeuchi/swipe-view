@@ -1,5 +1,3 @@
-// プラグインの設定画面で入力時に表示するメッセージを変えれるように
-// 各ステップでデータ保存、ネットが切れても途中から入力できる
 jQuery.noConflict();
 (($) => {
     'use strict';
@@ -18,12 +16,6 @@ jQuery.noConflict();
     if (localStorageData !== null) {
         localStorageJson = JSON.parse(localStorageData);
     }
-
-    async function sleep(delay, result) {
-        return new Promise(resolve => {
-          setTimeout(() => resolve(result), delay);
-        });
-      }
 
     let showSwipeArea = (el) => {
         let style = '';
@@ -208,6 +200,31 @@ jQuery.noConflict();
         }
     }
 
+    let showSwipeView = (event) => {
+        let record = event.record;
+
+        // プラグインの設定値から取得する
+        let el = kintone.mobile.app.record.getSpaceElement('pager');
+        showSwipeArea(el);
+
+        form.getLayout().then((layout) => {
+            form.grouping(layout);
+
+            pager.setMax(form.groupList.length);
+            list.setMax(form.groupList.length);
+
+            list.show(el);
+            form.first();
+            list.init();
+        });
+
+        if (localStorageData !== null) {
+            $(el).append('<div>反映しますか？</div><span id="ok">OK</span><span id="ng">NG</span>');
+        }
+
+        return event;
+    }
+
     let restore = (event) => {
         let noInputsNum = form.groupList.length - 2;
         let value = event.changes.field.value;
@@ -230,118 +247,107 @@ jQuery.noConflict();
 
 
     let form = new Form();
+    let pager = new Pager();
+    let list = new List(listId);
 
-    kintone.events.on(['mobile.app.record.create.show', 'mobile.app.record.edit.show'], (event) => {
-        console.log('abc');
-        let record = event.record;
 
-        // プラグインの設定値から取得する
-        let el = kintone.mobile.app.record.getSpaceElement('pager');
-        showSwipeArea(el);
 
-        let pager = new Pager();
-        let list = new List(listId);
+    let showEvent = [
+        'mobile.app.record.create.show',
+        'mobile.app.record.edit.show'
+    ];
 
-        form.getLayout().then((layout) => {
-            form.grouping(layout);
+    kintone.events.on(showEvent, showSwipeView);
 
-            pager.setMax(form.groupList.length);
-            list.setMax(form.groupList.length);
 
-            list.show(el);
-            form.first();
-            list.init();
-        });
-
-        if (localStorageData !== null) {
-            $(el).append('<div>反映しますか？</div><span id="ok">OK</span><span id="ng">NG</span>');
-        }
-
-        $(document).on('click', 'span#ok', () => {
-            let record = kintone.mobile.app.record.get();
-            kintone.events.off(changeEvent, restore);
-            for (let key of Object.keys(localStorageJson)) {
-                record.record[key].value = localStorageJson[key];
-            }
-            kintone.mobile.app.record.set(record);
-            kintone.events.on(changeEvent, restore);
-        })
-
-        $(document).on('click', `ul#${listId} li`, (event) => {
-            let before = pager.getPage();
-            let current = $(event.currentTarget).index();
-
-            if (current === pager.getMax() - 2) { // 未入力項目
-                form.noInputs(current);
-            } else if (current === pager.getMax() - 1) { // 全項目
-                form.active(current);
-            } else {
-                form.passive(before);
-                form.active(current);
-            }
-
-            list.passive(before);
-            list.active(current);
-
-            pager.setPage(current);
-        });
-
-        $(`div#${swipeSpaceId}`).hammer().bind('swiperight', () => {
-            console.log('swipe right');
-            let before = pager.getPage();
-            let current = before + 1;
-            if (current >= pager.getMax()) {
-                return;
-            }
-
-            if (current === pager.getMax() - 2) { // 未入力項目
-                form.noInputs(current);
-            } else if (current === pager.getMax() - 1) { // 全項目
-                form.active(current);
-            } else {
-                form.passive(before);
-                form.active(current);
-            }
-
-            list.passive(before);
-            list.active(current);
-
-            pager.setPage(current);
-        });
-        $(`div#${swipeSpaceId}`).hammer().bind('swipeleft', () => {
-            console.log('swipe left');
-            let before = pager.getPage();
-            let current = before - 1;
-            if (current < 0) {
-                return;
-            }
-
-            if (current === pager.getMax() - 2) { // 未入力項目
-                form.noInputs(current);
-            } else if (current === pager.getMax() - 1) { // 全項目
-                form.active(current);
-            } else {
-                form.passive(before);
-                form.active(current);
-            }
-
-            list.passive(before);
-            list.active(current);
-
-            pager.setPage(current);
-        });
-
-        return event;
-    });
 
     let changeEvent = [
         'mobile.app.record.create.change.ドロップダウン',
         'mobile.app.record.create.change.ユーザー選択',
         'mobile.app.record.create.change.チェックボックス',
     ];
+
     kintone.events.on(changeEvent, restore);
+
+
 
     kintone.events.on(['mobile.app.record.create.submit.success', 'mobile.app.record.edit.submit.success'], (event) => {
         localStorage.removeItem(localStorageKey);
+        return event;
+    });
+
+
+
+    $(document).on('click', 'span#ok', () => {
+        let record = kintone.mobile.app.record.get();
+        kintone.events.off(changeEvent, restore);
+        for (let key of Object.keys(localStorageJson)) {
+            record.record[key].value = localStorageJson[key];
+        }
+        kintone.mobile.app.record.set(record);
+        kintone.events.on(changeEvent, restore);
+    })
+
+    $(document).on('click', `ul#${listId} li`, (event) => {
+        let before = pager.getPage();
+        let current = $(event.currentTarget).index();
+
+        if (current === pager.getMax() - 2) { // 未入力項目
+            form.noInputs(current);
+        } else if (current === pager.getMax() - 1) { // 全項目
+            form.active(current);
+        } else {
+            form.passive(before);
+            form.active(current);
+        }
+
+        list.passive(before);
+        list.active(current);
+
+        pager.setPage(current);
+    });
+
+    $(`div#${swipeSpaceId}`).hammer().bind('swiperight', () => {
+        let before = pager.getPage();
+        let current = before + 1;
+        if (current >= pager.getMax()) {
+            return;
+        }
+
+        if (current === pager.getMax() - 2) { // 未入力項目
+            form.noInputs(current);
+        } else if (current === pager.getMax() - 1) { // 全項目
+            form.active(current);
+        } else {
+            form.passive(before);
+            form.active(current);
+        }
+
+        list.passive(before);
+        list.active(current);
+
+        pager.setPage(current);
+    });
+
+    $(`div#${swipeSpaceId}`).hammer().bind('swipeleft', () => {
+        let before = pager.getPage();
+        let current = before - 1;
+        if (current < 0) {
+            return;
+        }
+
+        if (current === pager.getMax() - 2) { // 未入力項目
+            form.noInputs(current);
+        } else if (current === pager.getMax() - 1) { // 全項目
+            form.active(current);
+        } else {
+            form.passive(before);
+            form.active(current);
+        }
+
+        list.passive(before);
+        list.active(current);
+
+        pager.setPage(current);
     });
 })(jQuery);
