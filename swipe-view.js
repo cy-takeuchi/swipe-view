@@ -223,7 +223,7 @@ jQuery.noConflict();
         });
 
         if (localStorageData !== null) {
-            $(el).append('<div>反映しますか？</div><span id="ok">OK</span><span id="ng">NG</span>');
+            $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
         return event;
@@ -277,7 +277,7 @@ jQuery.noConflict();
 
 
 
-    $(document).on('click', 'span#ok', () => {
+    $(document).on('click touchstart', 'span#ok', () => {
         let record = kintone.mobile.app.record.get();
         for (let fieldCode of Object.keys(localStorageJson)) {
             record.record[fieldCode].value = localStorageJson[fieldCode];
