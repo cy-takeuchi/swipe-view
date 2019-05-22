@@ -37,52 +37,49 @@ jQuery.noConflict();
         }
 
         grouping(layout) {
-            let array = [];
-            let all = [];
+            let array = {};
+            let all = {};
             for (let i of Object.keys(layout)) {
                 let type = layout[i].type;
                 if (type === 'GROUP') {
+                    let fieldCode = layout[i].code;
                     let obj = {
-                        code: layout[i].code,
-                        type: layout[i].type,
                         empty: true
                     }
-                    array.push(obj);
-                    all.push(obj);
+                    array[fieldCode] = obj;
+                    all[fieldCode] = obj;
                 } else if (type === 'ROW') {
                     let fields = layout[i].fields;
                     for (let j = 0; j < fields.length; j++) {
-                        let code = fields[j].code;
-                        let type = fields[j].type;
+                        let fieldCode = fields[j].code;
+                        let fieldType = fields[j].type;
                         let id = fields[j].elementId;
                         let obj = {
-                            code: code,
-                            type: type,
                             empty: true
                         }
 
-                        if (type === 'SPACER') {
+                        if (fieldType === 'SPACER') {
                             if (id === 'swipe') {
                                 continue;
                             }
-                        } else if (type === 'HR') {
+                        } else if (fieldType === 'HR') {
                             continue;
                         }
 
-                        if (type === 'SPACER') {
-                            if (array.length > 0) {
+                        if (fieldType === 'SPACER') {
+                            if (Object.keys(array).length > 0) {
                                 this.groupList.push(array);
-                                array = [];
+                                array = {};
                             }
                         } else {
-                            array.push(obj);
-                            all.push(obj);
+                            array[fieldCode] = obj;
+                            all[fieldCode] = obj;
                         }
                     }
                 }
             }
 
-            if (array.length > 0) {
+            if (Object.keys(array).length > 0) {
                 this.groupList.push(array);
             }
 
@@ -94,16 +91,14 @@ jQuery.noConflict();
         }
 
         active(num) {
-            for (let i = 0; i < this.groupList[num].length; i++) {
-                let field = this.groupList[num][i];
-                kintone.mobile.app.record.setFieldShown(field.code, true);
+            for (let fieldCode of Object.keys(this.groupList[num])) {
+                kintone.mobile.app.record.setFieldShown(fieldCode, true);
             }
         }
 
         passive(num) {
-            for (let i = 0; i < this.groupList[num].length; i++) {
-                let field = this.groupList[num][i];
-                kintone.mobile.app.record.setFieldShown(field.code, false);
+            for (let fieldCode of Object.keys(this.groupList[num])) {
+                kintone.mobile.app.record.setFieldShown(fieldCode, false);
             }
         }
 
@@ -113,23 +108,32 @@ jQuery.noConflict();
             // 未入力項目、全項目は外すから -2
             for (let i = 1; i < this.groupList.length - 2; i++) {
                 let group = this.groupList[i];
-                for (let j = 0; j < group.length; j++) {
-                    let field = group[j];
-                    kintone.mobile.app.record.setFieldShown(field.code, false);
+                for (let fieldCode of Object.keys(this.groupList[i])) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, false);
                 }
             }
         }
 
         // 未入力項目用
-        noInputs(num) {
-            for (let i = 0; i < this.groupList[num].length; i++) {
-                let field = this.groupList[num][i];
-                if (field.empty === true) {
-                    kintone.mobile.app.record.setFieldShown(field.code, true);
-                } else if (field.empty === false) {
-                    kintone.mobile.app.record.setFieldShown(field.code, false);
+        noInputs() {
+            let num = this.groupList.length - 2;
+            for (let fieldCode of Object.keys(this.groupList[num])) {
+                if (this.groupList[num][fieldCode].empty === true) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, true);
+                } else if (this.groupList[num][fieldCode].empty === false) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, false);
                 }
             }
+        }
+
+        input(fieldCode) {
+            let num = this.groupList.length - 2;
+            this.groupList[num][fieldCode].empty = false;
+        }
+
+        empty(fieldCode) {
+            let num = this.groupList.length - 2;
+            this.groupList[num][fieldCode].empty = true;
         }
     }
 
@@ -226,21 +230,16 @@ jQuery.noConflict();
     }
 
     let restore = (event) => {
-        let noInputsNum = form.groupList.length - 2;
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
 
         localStorageJson[fieldCode] = value;
-        console.log('Change!', fieldCode, value, localStorageJson);
         localStorage.setItem(localStorageKey, JSON.stringify(localStorageJson));
-        for (let i = 0; i < form.groupList[noInputsNum].length; i++) {
-            if (form.groupList[noInputsNum][i].code === fieldCode) {
-                if (value !== '' && value !== undefined) {
-                    form.groupList[noInputsNum][i]['empty'] = false;
-                } else {
-                    form.groupList[noInputsNum][i]['empty'] = true;
-                }
-            }
+
+        if (value !== '' && value !== undefined) {
+            form.input(fieldCode);
+        } else {
+            form.empty(fieldCode);
         }
     }
 
@@ -280,10 +279,11 @@ jQuery.noConflict();
 
     $(document).on('click', 'span#ok', () => {
         let record = kintone.mobile.app.record.get();
-        kintone.events.off(changeEvent, restore);
-        for (let key of Object.keys(localStorageJson)) {
-            record.record[key].value = localStorageJson[key];
+        for (let fieldCode of Object.keys(localStorageJson)) {
+            record.record[fieldCode].value = localStorageJson[fieldCode];
+            form.input(fieldCode);
         }
+        kintone.events.off(changeEvent, restore);
         kintone.mobile.app.record.set(record);
         kintone.events.on(changeEvent, restore);
     })
@@ -293,7 +293,7 @@ jQuery.noConflict();
         let current = $(event.currentTarget).index();
 
         if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs(current);
+            form.noInputs();
         } else if (current === pager.getMax() - 1) { // 全項目
             form.active(current);
         } else {
@@ -316,7 +316,7 @@ jQuery.noConflict();
         }
 
         if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs(current);
+            form.noInputs();
         } else if (current === pager.getMax() - 1) { // 全項目
             form.active(current);
         } else {
@@ -339,7 +339,7 @@ jQuery.noConflict();
         }
 
         if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs(current);
+            form.noInputs();
         } else if (current === pager.getMax() - 1) { // 全項目
             form.active(current);
         } else {
