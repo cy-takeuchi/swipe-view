@@ -20,7 +20,7 @@ jQuery.noConflict();
     let showSwipeArea = (el) => {
         let style = '';
         style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: absolute; bottom: 5px;';
+        style += 'z-index: 999; position: fixed; bottom: 70px;';
         style += 'background-color: gold; opacity: 0.6;';
         let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
         $(el).append(html);
@@ -307,7 +307,8 @@ jQuery.noConflict();
         pager.setPage(current);
     });
 
-    $(`div#${swipeSpaceId}`).hammer().bind('swiperight', () => {
+    $(document).hammer({domEvents:true}).on('swiperight', `div#${swipeSpaceId}`, () => {
+        console.log('swipe right');
         let before = pager.getPage();
         let current = before + 1;
         if (current >= pager.getMax()) {
@@ -329,7 +330,8 @@ jQuery.noConflict();
         pager.setPage(current);
     });
 
-    $(`div#${swipeSpaceId}`).hammer().bind('swipeleft', () => {
+    $(document).hammer({domEvents:true}).on('swipeleft', `div#${swipeSpaceId}`, () => {
+        console.log('swipe left');
         let before = pager.getPage();
         let current = before - 1;
         if (current < 0) {
