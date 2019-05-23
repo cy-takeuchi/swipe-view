@@ -20,7 +20,7 @@ jQuery.noConflict();
     let showSwipeArea = (el) => {
         let style = '';
         style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: fixed; bottom: 70px;';
+        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
         style += 'background-color: gold; opacity: 0.6;';
         let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
         $(el).append(html);
