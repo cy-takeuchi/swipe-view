@@ -204,7 +204,6 @@ jQuery.noConflict();
         }
 
         init() {
-            console.log('click', $(this.el));
             $(this.el).eq(0).click();
         }
 
@@ -241,8 +240,7 @@ jQuery.noConflict();
     let showSwipeView = (event) => {
         let record = event.record;
 
-        let type = event.type, showMode = 'false';
-        if (type === 'mobile.app.record.detail.show') {
+        if (event.type === 'mobile.app.record.detail.show') {
             form.setShowMode(true);
             pager.setShowMode(true);
         }
@@ -266,6 +264,67 @@ jQuery.noConflict();
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
+        var mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
+        if (pager.getShowMode() === true) {
+            mc.get('swipe').set({direction: Hammer.DIRECTION_ALL});
+        } else {
+            mc.get('swipe').set({direction: Hammer.DIRECTION_HORIZONTAL});
+        }
+
+        mc.on('swiperight', () => {
+            console.log('swipe right');
+            let before = pager.getPage();
+            let current = before + 1;
+            if (current >= pager.getMax()) {
+                return;
+            }
+
+            if (pager.isNoInputsPage(current) === true) {
+                form.noInputs(pager.getNoInputsNum());
+            } else if (pager.isAllPage(current) === true) {
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
+
+            pager.passive(before);
+            pager.active(current);
+
+            pager.setPage(current);
+        });
+
+        mc.on('swipeleft', () => {
+            console.log('swipe left');
+            let before = pager.getPage();
+            let current = before - 1;
+            if (current < 0) {
+                return;
+            }
+
+            if (pager.isNoInputsPage(current) === true) {
+                form.noInputs(pager.getNoInputsNum());
+            } else if (pager.isAllPage(current) === true) {
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
+
+            pager.passive(before);
+            pager.active(current);
+
+            pager.setPage(current);
+        });
+
+        mc.on('swipeup', () => {
+            console.log('swipe up');
+        });
+
+        mc.on('swipedown', () => {
+            console.log('swipe down');
+        });
+
         return event;
     }
 
@@ -287,7 +346,6 @@ jQuery.noConflict();
 
     let form = new Form();
     let pager = new Pager(listId);
-    //let list = new List(listId);
 
 
 
@@ -332,52 +390,6 @@ jQuery.noConflict();
     $(document).on('click', `ul#${listId} li`, (event) => {
         let before = pager.getPage();
         let current = $(event.currentTarget).index();
-
-        if (pager.isNoInputsPage(current) === true) {
-            form.noInputs(pager.getNoInputsNum());
-        } else if (pager.isAllPage(current) === true) {
-            form.active(current);
-        } else {
-            form.passive(before);
-            form.active(current);
-        }
-
-        pager.passive(before);
-        pager.active(current);
-
-        pager.setPage(current);
-    });
-
-    $(document).hammer({domEvents:true}).on('swiperight', `div#${swipeSpaceId}`, () => {
-        console.log('swipe right');
-        let before = pager.getPage();
-        let current = before + 1;
-        if (current >= pager.getMax()) {
-            return;
-        }
-
-        if (pager.isNoInputsPage(current) === true) {
-            form.noInputs(pager.getNoInputsNum());
-        } else if (pager.isAllPage(current) === true) {
-            form.active(current);
-        } else {
-            form.passive(before);
-            form.active(current);
-        }
-
-        pager.passive(before);
-        pager.active(current);
-
-        pager.setPage(current);
-    });
-
-    $(document).hammer({domEvents:true}).on('swipeleft', `div#${swipeSpaceId}`, () => {
-        console.log('swipe left');
-        let before = pager.getPage();
-        let current = before - 1;
-        if (current < 0) {
-            return;
-        }
 
         if (pager.isNoInputsPage(current) === true) {
             form.noInputs(pager.getNoInputsNum());
