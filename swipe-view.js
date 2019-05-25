@@ -29,6 +29,15 @@ jQuery.noConflict();
     class Form {
         constructor() {
             this.groupList = [];
+            this.showMode = false;
+        }
+
+        setShowMode(showMode) {
+            this.showMode = showMode;
+        }
+
+        getShowMode() {
+            return this.showMode;
         }
 
         async getLayout() {
@@ -36,7 +45,7 @@ jQuery.noConflict();
             return res.layout;
         }
 
-        grouping(layout) {
+        grouping(layout, mode) {
             let array = {};
             let all = {};
             for (let i of Object.keys(layout)) {
@@ -84,7 +93,9 @@ jQuery.noConflict();
             }
 
             // 未入力を設定
-            this.groupList.push(all);
+            if (this.getShowMode() === false) {
+                this.groupList.push(all);
+            }
 
             // 全件を設定
             this.groupList.push(all);
@@ -103,10 +114,10 @@ jQuery.noConflict();
         }
 
         // 初期表示用
-        first(noInputsNum) {
+        first(num) {
             // 最初のグループリストは表示するから開始は1
             // 未入力項目以前が対象
-            for (let i = 1; i < noInputsNum; i++) {
+            for (let i = 1; i < num; i++) {
                 let group = this.groupList[i];
                 for (let fieldCode of Object.keys(this.groupList[i])) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, false);
@@ -115,11 +126,11 @@ jQuery.noConflict();
         }
 
         // 未入力項目用
-        noInputs(noInputsNum) {
-            for (let fieldCode of Object.keys(this.groupList[noInputsNum])) {
-                if (this.groupList[noInputsNum][fieldCode].empty === true) {
+        noInputs(num) {
+            for (let fieldCode of Object.keys(this.groupList[num])) {
+                if (this.groupList[num][fieldCode].empty === true) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, true);
-                } else if (this.groupList[noInputsNum][fieldCode].empty === false) {
+                } else if (this.groupList[num][fieldCode].empty === false) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, false);
                 }
             }
@@ -135,28 +146,53 @@ jQuery.noConflict();
     }
 
     class Pager {
-        constructor() {
+        constructor(id) {
+            this.id = id;
+            this.el = `ul#${id} li`;
+
             this.current = 0;
             this.min = 0;
             this.max = 0;
 
             this.setPage(0);
+
+            this.showMode = false;
         }
 
-        getMax() {
-            return this.max;
+        setShowMode(showMode) {
+            this.showMode = showMode;
+        }
+
+        getShowMode() {
+            return this.showMode;
         }
 
         setMax(max) {
             this.max = max;
         }
 
+        getMax() {
+            return this.max;
+        }
+
+        getNormalNum() {
+            return (this.getShowMode() === true) ? this.max - 1 : this.max - 2;
+        }
+
         getNoInputsNum() {
-            return this.max - 2;
+            return (this.getShowMode() === true) ? null : this.max - 2;
         }
 
         getAllNum() {
             return this.max - 1;
+        }
+
+        isNoInputsPage(num) {
+            return (num === this.getNoInputsNum()) ? true : false;
+        }
+
+        isAllPage(num) {
+            return (num === this.getAllNum()) ? true : false;
         }
 
         getPage() {
@@ -166,27 +202,24 @@ jQuery.noConflict();
         setPage(num) {
             this.current = num;
         }
-    }
-
-    class List {
-        constructor(id) {
-            this.id = id;
-            this.el = `ul#${id} li`;
-            this.max = 0;
-        }
 
         init() {
+            console.log('click', $(this.el));
             $(this.el).eq(0).click();
         }
 
-        show(el, noInputsNum) {
+        show(el, num) {
             let html = '';
             html += '<div>';
+
             html += `<ul id="${this.id}" style="display: inline-block; margin: 20px; padding: 0px;">`;
-            for (let i = 0; i < noInputsNum; i++) {
+            for (let i = 0; i < num; i++) {
                 html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">${i + 1}</a></li>`;
             }
-            html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">未入力項目</a></li>`;
+
+            if (this.getShowMode() === false) {
+                html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">未入力項目</a></li>`;
+            }
             html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">全項目</a></li>`;
             html += '</ul>';
             html += '</div>';
@@ -208,6 +241,13 @@ jQuery.noConflict();
     let showSwipeView = (event) => {
         let record = event.record;
 
+        let type = event.type, showMode = 'false';
+        if (type === 'mobile.app.record.detail.show') {
+            form.setShowMode(true);
+            pager.setShowMode(true);
+        }
+
+
         // プラグインの設定値から取得する
         let el = kintone.mobile.app.record.getSpaceElement('pager');
         showSwipeArea(el);
@@ -217,12 +257,12 @@ jQuery.noConflict();
 
             pager.setMax(form.groupList.length);
 
-            list.show(el, pager.getNoInputsNum());
-            form.first(pager.getNoInputsNum());
-            list.init();
+            pager.show(el, pager.getNormalNum());
+            form.first(pager.getNormalNum());
+            pager.init();
         });
 
-        if (localStorageData !== null) {
+        if ((pager.getShowMode() === false) && (localStorageData !== null)) {
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
@@ -246,12 +286,13 @@ jQuery.noConflict();
 
 
     let form = new Form();
-    let pager = new Pager();
-    let list = new List(listId);
+    let pager = new Pager(listId);
+    //let list = new List(listId);
 
 
 
     let showEvent = [
+        'mobile.app.record.detail.show',
         'mobile.app.record.create.show',
         'mobile.app.record.edit.show'
     ];
@@ -292,17 +333,17 @@ jQuery.noConflict();
         let before = pager.getPage();
         let current = $(event.currentTarget).index();
 
-        if (current === pager.getNoInputsNum()) { // 未入力項目
+        if (pager.isNoInputsPage(current) === true) {
             form.noInputs(pager.getNoInputsNum());
-        } else if (current === pager.getAllNum()) { // 全項目
+        } else if (pager.isAllPage(current) === true) {
             form.active(current);
         } else {
             form.passive(before);
             form.active(current);
         }
 
-        list.passive(before);
-        list.active(current);
+        pager.passive(before);
+        pager.active(current);
 
         pager.setPage(current);
     });
@@ -315,17 +356,17 @@ jQuery.noConflict();
             return;
         }
 
-        if (current === pager.getNoInputsNum()) { // 未入力項目
+        if (pager.isNoInputsPage(current) === true) {
             form.noInputs(pager.getNoInputsNum());
-        } else if (current === pager.getAllNum()) { // 全項目
+        } else if (pager.isAllPage(current) === true) {
             form.active(current);
         } else {
             form.passive(before);
             form.active(current);
         }
 
-        list.passive(before);
-        list.active(current);
+        pager.passive(before);
+        pager.active(current);
 
         pager.setPage(current);
     });
@@ -338,17 +379,17 @@ jQuery.noConflict();
             return;
         }
 
-        if (current === pager.getNoInputsNum()) { // 未入力項目
+        if (pager.isNoInputsPage(current) === true) {
             form.noInputs(pager.getNoInputsNum());
-        } else if (current === pager.getAllNum()) { // 全項目
+        } else if (pager.isAllPage(current) === true) {
             form.active(current);
         } else {
             form.passive(before);
             form.active(current);
         }
 
-        list.passive(before);
-        list.active(current);
+        pager.passive(before);
+        pager.active(current);
 
         pager.setPage(current);
     });
