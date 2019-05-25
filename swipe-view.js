@@ -103,10 +103,10 @@ jQuery.noConflict();
         }
 
         // 初期表示用
-        first() {
+        first(noInputsNum) {
             // 最初のグループリストは表示するから開始は1
-            // 未入力項目、全項目は外すから -2
-            for (let i = 1; i < this.groupList.length - 2; i++) {
+            // 未入力項目以前が対象
+            for (let i = 1; i < noInputsNum; i++) {
                 let group = this.groupList[i];
                 for (let fieldCode of Object.keys(this.groupList[i])) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, false);
@@ -115,25 +115,22 @@ jQuery.noConflict();
         }
 
         // 未入力項目用
-        noInputs() {
-            let num = this.groupList.length - 2;
-            for (let fieldCode of Object.keys(this.groupList[num])) {
-                if (this.groupList[num][fieldCode].empty === true) {
+        noInputs(noInputsNum) {
+            for (let fieldCode of Object.keys(this.groupList[noInputsNum])) {
+                if (this.groupList[noInputsNum][fieldCode].empty === true) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, true);
-                } else if (this.groupList[num][fieldCode].empty === false) {
+                } else if (this.groupList[noInputsNum][fieldCode].empty === false) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, false);
                 }
             }
         }
 
-        input(fieldCode) {
-            let num = this.groupList.length - 2;
-            this.groupList[num][fieldCode].empty = false;
+        input(fieldCode, noInputsNum) {
+            this.groupList[noInputsNum][fieldCode].empty = false;
         }
 
-        empty(fieldCode) {
-            let num = this.groupList.length - 2;
-            this.groupList[num][fieldCode].empty = true;
+        empty(fieldCode, noInputsNum) {
+            this.groupList[noInputsNum][fieldCode].empty = true;
         }
     }
 
@@ -152,6 +149,14 @@ jQuery.noConflict();
 
         setMax(max) {
             this.max = max;
+        }
+
+        getNoInputsNum() {
+            return this.max - 2;
+        }
+
+        getAllNum() {
+            return this.max - 1;
         }
 
         getPage() {
@@ -174,15 +179,11 @@ jQuery.noConflict();
             $(this.el).eq(0).click();
         }
 
-        setMax(max) {
-            this.max = max;
-        }
-
-        show(el) {
+        show(el, noInputsNum) {
             let html = '';
             html += '<div>';
             html += `<ul id="${this.id}" style="display: inline-block; margin: 20px; padding: 0px;">`;
-            for (let i = 0; i < this.max - 2; i++) {
+            for (let i = 0; i < noInputsNum; i++) {
                 html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">${i + 1}</a></li>`;
             }
             html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">未入力項目</a></li>`;
@@ -215,10 +216,9 @@ jQuery.noConflict();
             form.grouping(layout);
 
             pager.setMax(form.groupList.length);
-            list.setMax(form.groupList.length);
 
-            list.show(el);
-            form.first();
+            list.show(el, pager.getNoInputsNum());
+            form.first(pager.getNoInputsNum());
             list.init();
         });
 
@@ -237,9 +237,9 @@ jQuery.noConflict();
         localStorage.setItem(localStorageKey, JSON.stringify(localStorageJson));
 
         if (value !== '' && value !== undefined) {
-            form.input(fieldCode);
+            form.input(fieldCode, pager.getNoInputsNum());
         } else {
-            form.empty(fieldCode);
+            form.empty(fieldCode, pager.getNoInputsNum());
         }
     }
 
@@ -281,7 +281,7 @@ jQuery.noConflict();
         let record = kintone.mobile.app.record.get();
         for (let fieldCode of Object.keys(localStorageJson)) {
             record.record[fieldCode].value = localStorageJson[fieldCode];
-            form.input(fieldCode);
+            form.input(fieldCode, pager.getNoInputsNum());
         }
         kintone.events.off(changeEvent, restore);
         kintone.mobile.app.record.set(record);
@@ -292,9 +292,9 @@ jQuery.noConflict();
         let before = pager.getPage();
         let current = $(event.currentTarget).index();
 
-        if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs();
-        } else if (current === pager.getMax() - 1) { // 全項目
+        if (current === pager.getNoInputsNum()) { // 未入力項目
+            form.noInputs(pager.getNoInputsNum());
+        } else if (current === pager.getAllNum()) { // 全項目
             form.active(current);
         } else {
             form.passive(before);
@@ -315,9 +315,9 @@ jQuery.noConflict();
             return;
         }
 
-        if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs();
-        } else if (current === pager.getMax() - 1) { // 全項目
+        if (current === pager.getNoInputsNum()) { // 未入力項目
+            form.noInputs(pager.getNoInputsNum());
+        } else if (current === pager.getAllNum()) { // 全項目
             form.active(current);
         } else {
             form.passive(before);
@@ -338,9 +338,9 @@ jQuery.noConflict();
             return;
         }
 
-        if (current === pager.getMax() - 2) { // 未入力項目
-            form.noInputs();
-        } else if (current === pager.getMax() - 1) { // 全項目
+        if (current === pager.getNoInputsNum()) { // 未入力項目
+            form.noInputs(pager.getNoInputsNum());
+        } else if (current === pager.getAllNum()) { // 全項目
             form.active(current);
         } else {
             form.passive(before);
