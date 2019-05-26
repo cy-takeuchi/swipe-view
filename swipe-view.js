@@ -2,19 +2,26 @@ jQuery.noConflict();
 (($) => {
     'use strict';
 
-    let conn = new kintoneJSSDK.Connection();
-    let kintoneApp = new kintoneJSSDK.App(conn);
+    const conn = new kintoneJSSDK.Connection();
+    const kintoneApp = new kintoneJSSDK.App(conn);
     const appId = kintone.mobile.app.getId();
     const subdomain = window.location.hostname.split('.')[0];
-    const localStorageKey = `sv-${subdomain}-${appId}`;
+    const lsInputKey = `sv-${subdomain}-${appId}-input`; // 入力したフィールドの保存用
+    const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
 
     const swipeSpaceId = 'cy-swipe';
     const listId = 'cy-ul';
 
-    let localStorageData = localStorage.getItem(localStorageKey);
-    let localStorageJson = {};
-    if (localStorageData !== null) {
-        localStorageJson = JSON.parse(localStorageData);
+    let lsInputData = localStorage.getItem(lsInputKey);
+    let lsInputJson = {};
+    if (lsInputData !== null) {
+        lsInputJson = JSON.parse(lsInputData);
+    }
+
+    let lsListData = localStorage.getItem(lsListKey);
+    let lsListJson = {};
+    if (lsListData !== null) {
+        lsListJson = JSON.parse(lsListData);
     }
 
     let showSwipeArea = (el) => {
@@ -245,7 +252,6 @@ jQuery.noConflict();
             pager.setShowMode(true);
         }
 
-
         // プラグインの設定値から取得する
         let el = kintone.mobile.app.record.getSpaceElement('pager');
         showSwipeArea(el);
@@ -260,7 +266,7 @@ jQuery.noConflict();
             pager.init();
         });
 
-        if ((pager.getShowMode() === false) && (localStorageData !== null)) {
+        if ((pager.getShowMode() === false) && (lsInputData !== null)) {
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
@@ -319,21 +325,50 @@ jQuery.noConflict();
 
         mc.on('swipeup', () => {
             console.log('swipe up');
+            let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+            let recordId = Number(match[2]);
+            let index = lsListJson.indexOf(recordId);
+            let nextRecordId = lsListJson[index + 1];
+            if (nextRecordId !== undefined) {
+                let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+                location.href = newUrl;
+            }
         });
 
         mc.on('swipedown', () => {
             console.log('swipe down');
+            let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+            let recordId = Number(match[2]);
+            let index = lsListJson.indexOf(recordId);
+            let nextRecordId = lsListJson[index - 1];
+            if (nextRecordId !== undefined) {
+                let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+                location.href = newUrl;
+            }
         });
+
+        $(document).on('click touchstart', 'span#ok', restore);
 
         return event;
     }
 
-    let restore = (event) => {
+    let restore = () => {
+        let record = kintone.mobile.app.record.get();
+        for (let fieldCode of Object.keys(lsInputJson)) {
+            record.record[fieldCode].value = lsInputJson[fieldCode];
+            form.input(fieldCode, pager.getNoInputsNum());
+        }
+        kintone.events.off(changeEvent, change);
+        kintone.mobile.app.record.set(record);
+        kintone.events.on(changeEvent, change);
+    }
+
+    let change = (event) => {
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
 
-        localStorageJson[fieldCode] = value;
-        localStorage.setItem(localStorageKey, JSON.stringify(localStorageJson));
+        lsInputJson[fieldCode] = value;
+        localStorage.setItem(lsInputKey, JSON.stringify(lsInputJson));
 
         if (value !== '' && value !== undefined) {
             form.input(fieldCode, pager.getNoInputsNum());
@@ -354,7 +389,6 @@ jQuery.noConflict();
         'mobile.app.record.create.show',
         'mobile.app.record.edit.show'
     ];
-
     kintone.events.on(showEvent, showSwipeView);
 
 
@@ -364,28 +398,32 @@ jQuery.noConflict();
         'mobile.app.record.create.change.ユーザー選択',
         'mobile.app.record.create.change.チェックボックス',
     ];
-
-    kintone.events.on(changeEvent, restore);
-
+    kintone.events.on(changeEvent, change);
 
 
-    kintone.events.on(['mobile.app.record.create.submit.success', 'mobile.app.record.edit.submit.success'], (event) => {
-        localStorage.removeItem(localStorageKey);
+
+    let submitSuccessEvent = [
+        'mobile.app.record.create.submit.success',
+        'mobile.app.record.edit.submit.success'
+    ];
+    kintone.events.on(submitSuccessEvent, (event) => {
+        localStorage.removeItem(lsInputKey);
         return event;
     });
 
+    kintone.events.on(['mobile.app.record.index.show'], (event) => {
+        console.log('index', event);
+        let records = event.records;
 
-
-    $(document).on('click touchstart', 'span#ok', () => {
-        let record = kintone.mobile.app.record.get();
-        for (let fieldCode of Object.keys(localStorageJson)) {
-            record.record[fieldCode].value = localStorageJson[fieldCode];
-            form.input(fieldCode, pager.getNoInputsNum());
+        let recordIdList = [];
+        for (let i = 0; i < records.length; i++) {
+            recordIdList.unshift(Number(records[i].$id.value));
         }
-        kintone.events.off(changeEvent, restore);
-        kintone.mobile.app.record.set(record);
-        kintone.events.on(changeEvent, restore);
-    })
+
+        localStorage.setItem(lsListKey, JSON.stringify(recordIdList));
+    });
+
+
 
     $(document).on('click', `ul#${listId} li`, (event) => {
         let before = pager.getPage();
