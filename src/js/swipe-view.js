@@ -6,7 +6,7 @@ jQuery.noConflict();
     try {
         pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
     } catch (e) {
-        console.log(e);
+        console.log(`[ERROR]: ${e}`);
         return false;
     }
     console.log(pluginConfig);
@@ -66,7 +66,7 @@ jQuery.noConflict();
             let all = {};
             for (let i of Object.keys(layout)) {
                 let type = layout[i].type;
-                if (type === 'GROUP') {
+                if (type === 'GROUP' || type === 'SUBTABLE') {
                     let fieldCode = layout[i].code;
                     let obj = {
                         empty: true
@@ -420,7 +420,6 @@ jQuery.noConflict();
     });
 
     kintone.events.on(['mobile.app.record.index.show'], (event) => {
-        console.log('index', event);
         let records = event.records;
 
         let recordIdList = [];
