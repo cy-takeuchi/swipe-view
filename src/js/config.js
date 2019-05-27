@@ -1,22 +1,25 @@
 jQuery.noConflict();
-
-(function($, PLUGIN_ID) {
+(($, PLUGIN_ID) => {
     'use strict';
 
     var $form = $('.js-submit-settings');
-    var $message = $('.js-text-message');
+    var $svSpaceId = $('#svSpaceId');
 
-    function getSettingsUrl() {
+    let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + kintone.app.getId();
     }
 
     var config = kintone.plugin.app.getConfig(PLUGIN_ID);
-    if (config.message) {
-        $message.val(config.message);
+    if (config.svSpaceId) {
+        $svSpaceId.val(config.svSpaceId);
     }
-    $form.on('submit', function(e) {
+
+    $form.on('submit', (e) => {
         e.preventDefault();
-        kintone.plugin.app.setConfig({message: $message.val()}, function() {
+
+        let saveData = {};
+        saveData.svSpaceId = $svSpaceId.val();
+        kintone.plugin.app.setConfig(saveData, () => {
             alert('Please update the app!');
             window.location.href = getSettingsUrl();
         });

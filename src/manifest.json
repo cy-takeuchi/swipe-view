@@ -13,9 +13,11 @@
     "html": "html/config.html",
     "js": [
       "js/jquery-3.4.1.min.js",
-      "js/kintone-js-sdk.min.js"
+      "js/kintone-js-sdk.min.js",
+      "js/config.js"
     ],
     "css": [
+      "css/51-modern-default.css"
     ],
     "required_params": [
     ]

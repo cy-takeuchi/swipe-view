@@ -1,6 +1,15 @@
 jQuery.noConflict();
-(($) => {
+(($, PLUGIN_ID) => {
     'use strict';
+
+    let pluginConfig = {};
+    try {
+        pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+    console.log(pluginConfig);
 
     const conn = new kintoneJSSDK.Connection();
     const kintoneApp = new kintoneJSSDK.App(conn);
@@ -252,8 +261,7 @@ jQuery.noConflict();
             pager.setShowMode(true);
         }
 
-        // プラグインの設定値から取得する
-        let el = kintone.mobile.app.record.getSpaceElement('pager');
+        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpaceId);
         showSwipeArea(el);
 
         form.getLayout().then((layout) => {
@@ -443,4 +451,4 @@ jQuery.noConflict();
 
         pager.setPage(current);
     });
-})(jQuery);
+})(jQuery, kintone.$PLUGIN_ID);
