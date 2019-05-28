@@ -22,7 +22,6 @@ jQuery.noConflict();
     const listId = 'cy-ul';
 
     let lsInputData = localStorage.getItem(lsInputKey);
-    console.log(lsInputKey, lsInputData);
     let lsInputJson = {};
     if (lsInputData !== null) {
         lsInputJson = JSON.parse(lsInputData);
@@ -38,14 +37,6 @@ jQuery.noConflict();
         constructor() {
             this.groupList = [];
             this.showMode = false;
-        }
-
-        setShowMode(showMode) {
-            this.showMode = showMode;
-        }
-
-        getShowMode() {
-            return this.showMode;
         }
 
         active(num) {
@@ -101,7 +92,7 @@ jQuery.noConflict();
             this.min = 0;
             this.max = 0;
 
-            this.setPage(0);
+            this.setCurrentPage(0);
 
             this.showMode = false;
         }
@@ -130,23 +121,19 @@ jQuery.noConflict();
             return (this.getShowMode() === true) ? null : this.max - 2;
         }
 
-        getAllNum() {
-            return this.max - 1;
-        }
-
         isNoInputsPage(num) {
             return (num === this.getNoInputsNum()) ? true : false;
         }
 
         isAllPage(num) {
-            return (num === this.getAllNum()) ? true : false;
+            return (num === this.max - 1) ? true : false;
         }
 
-        getPage() {
+        getCurrentPage() {
             return this.current;
         }
 
-        setPage(num) {
+        setCurrentPage(num) {
             this.current = num;
         }
 
@@ -187,7 +174,7 @@ jQuery.noConflict();
     let showSwipeViewForRead = (event) => {
         let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
 
-        pager.setShowMode(false);
+        pager.setShowMode(true);
 
         form.groupList = JSON.parse(pluginConfig.svGroupListForRead);
         pager.setMax(form.groupList.length);
@@ -208,7 +195,7 @@ jQuery.noConflict();
 
         mc.on('swiperight', () => {
             console.log('swipe right');
-            let before = pager.getPage();
+            let before = pager.getCurrentPage();
             let current = before + 1;
             if (current >= pager.getMax()) {
                 return;
@@ -226,12 +213,12 @@ jQuery.noConflict();
             pager.passive(before);
             pager.active(current);
 
-            pager.setPage(current);
+            pager.setCurrentPage(current);
         });
 
         mc.on('swipeleft', () => {
             console.log('swipe left');
-            let before = pager.getPage();
+            let before = pager.getCurrentPage();
             let current = before - 1;
             if (current < 0) {
                 return;
@@ -249,7 +236,7 @@ jQuery.noConflict();
             pager.passive(before);
             pager.active(current);
 
-            pager.setPage(current);
+            pager.setCurrentPage(current);
         });
 
         mc.on('swipeup', () => {
@@ -282,12 +269,7 @@ jQuery.noConflict();
     let showSwipeViewForWrite = (event) => {
         let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
 
-        let style = '';
-        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
-        style += 'background-color: gold; opacity: 0.6;';
-        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
-        $(el).append(html);
+        pager.setShowMode(false);
 
         form.groupList = JSON.parse(pluginConfig.svGroupListForWrite);
         pager.setMax(form.groupList.length);
@@ -300,12 +282,19 @@ jQuery.noConflict();
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
+        let style = '';
+        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
+        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
+        style += 'background-color: gold; opacity: 0.6;';
+        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
+        $(el).append(html);
+
         let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
         mc.get('swipe').set({direction: Hammer.DIRECTION_HORIZONTAL});
 
         mc.on('swiperight', () => {
             console.log('swipe right');
-            let before = pager.getPage();
+            let before = pager.getCurrentPage();
             let current = before + 1;
             if (current >= pager.getMax()) {
                 return;
@@ -323,12 +312,12 @@ jQuery.noConflict();
             pager.passive(before);
             pager.active(current);
 
-            pager.setPage(current);
+            pager.setCurrentPage(current);
         });
 
         mc.on('swipeleft', () => {
             console.log('swipe left');
-            let before = pager.getPage();
+            let before = pager.getCurrentPage();
             let current = before - 1;
             if (current < 0) {
                 return;
@@ -346,7 +335,7 @@ jQuery.noConflict();
             pager.passive(before);
             pager.active(current);
 
-            pager.setPage(current);
+            pager.setCurrentPage(current);
         });
 
         $(document).on('click touchstart', 'span#ok', restore);
@@ -370,7 +359,6 @@ jQuery.noConflict();
         let fieldCode = event.type.replace(/.*\./, '');
 
         lsInputJson[fieldCode] = value;
-        console.log('koko', lsInputKey);
         localStorage.setItem(lsInputKey, JSON.stringify(lsInputJson));
 
         if (value !== '' && value !== undefined) {
@@ -435,7 +423,7 @@ jQuery.noConflict();
 
 
     $(document).on('click', `ul#${listId} li`, (event) => {
-        let before = pager.getPage();
+        let before = pager.getCurrentPage();
         let current = $(event.currentTarget).index();
 
         if (pager.isNoInputsPage(current) === true) {
@@ -450,7 +438,7 @@ jQuery.noConflict();
         pager.passive(before);
         pager.active(current);
 
-        pager.setPage(current);
+        pager.setCurrentPage(current);
     });
 
 })(jQuery, kintone.$PLUGIN_ID);
