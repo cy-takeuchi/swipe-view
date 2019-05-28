@@ -174,7 +174,7 @@ jQuery.noConflict();
     }
 
     let showSwipeViewForRead = (event) => {
-        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
+        let el = kintone.mobile.app.getHeaderSpaceElement();
 
         pager.setShowMode(true);
 
@@ -269,7 +269,7 @@ jQuery.noConflict();
     }
 
     let showSwipeViewForWrite = (event) => {
-        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
+        let el = kintone.mobile.app.getHeaderSpaceElement();
 
         pager.setShowMode(false);
 
