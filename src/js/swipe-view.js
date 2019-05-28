@@ -7,7 +7,7 @@ jQuery.noConflict();
         pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
     } catch (e) {
         console.log(`[ERROR]: ${e}`);
-        return false;
+        return;
     }
     console.log(pluginConfig);
 
@@ -22,6 +22,7 @@ jQuery.noConflict();
     const listId = 'cy-ul';
 
     let lsInputData = localStorage.getItem(lsInputKey);
+    console.log(lsInputKey, lsInputData);
     let lsInputJson = {};
     if (lsInputData !== null) {
         lsInputJson = JSON.parse(lsInputData);
@@ -31,15 +32,6 @@ jQuery.noConflict();
     let lsListJson = {};
     if (lsListData !== null) {
         lsListJson = JSON.parse(lsListData);
-    }
-
-    let showSwipeArea = (el) => {
-        let style = '';
-        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
-        style += 'background-color: gold; opacity: 0.6;';
-        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
-        $(el).append(html);
     }
 
     class Form {
@@ -54,67 +46,6 @@ jQuery.noConflict();
 
         getShowMode() {
             return this.showMode;
-        }
-
-        async getLayout() {
-            let res = await kintoneApp.getFormLayout(appId);
-            return res.layout;
-        }
-
-        grouping(layout, mode) {
-            let array = {};
-            let all = {};
-            for (let i of Object.keys(layout)) {
-                let type = layout[i].type;
-                if (type === 'GROUP' || type === 'SUBTABLE') {
-                    let fieldCode = layout[i].code;
-                    let obj = {
-                        empty: true
-                    }
-                    array[fieldCode] = obj;
-                    all[fieldCode] = obj;
-                } else if (type === 'ROW') {
-                    let fields = layout[i].fields;
-                    for (let j = 0; j < fields.length; j++) {
-                        let fieldCode = fields[j].code;
-                        let fieldType = fields[j].type;
-                        let id = fields[j].elementId;
-                        let obj = {
-                            empty: true
-                        }
-
-                        if (fieldType === 'SPACER') {
-                            if (id === 'swipe') {
-                                continue;
-                            }
-                        } else if (fieldType === 'HR') {
-                            continue;
-                        }
-
-                        if (fieldType === 'SPACER') {
-                            if (Object.keys(array).length > 0) {
-                                this.groupList.push(array);
-                                array = {};
-                            }
-                        } else {
-                            array[fieldCode] = obj;
-                            all[fieldCode] = obj;
-                        }
-                    }
-                }
-            }
-
-            if (Object.keys(array).length > 0) {
-                this.groupList.push(array);
-            }
-
-            // 未入力を設定
-            if (this.getShowMode() === false) {
-                this.groupList.push(all);
-            }
-
-            // 全件を設定
-            this.groupList.push(all);
         }
 
         active(num) {
@@ -253,37 +184,27 @@ jQuery.noConflict();
         }
     }
 
-    let showSwipeView = (event) => {
-        let record = event.record;
+    let showSwipeViewForRead = (event) => {
+        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
 
-        if (event.type === 'mobile.app.record.detail.show') {
-            form.setShowMode(true);
-            pager.setShowMode(true);
-        }
+        pager.setShowMode(false);
 
-        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpaceId);
-        showSwipeArea(el);
+        form.groupList = JSON.parse(pluginConfig.svGroupListForRead);
+        pager.setMax(form.groupList.length);
 
-        form.getLayout().then((layout) => {
-            form.grouping(layout);
+        pager.show(el, pager.getNormalNum());
+        form.first(pager.getNormalNum());
+        pager.init();
 
-            pager.setMax(form.groupList.length);
+        let style = '';
+        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
+        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
+        style += 'background-color: gold; opacity: 0.6;';
+        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
+        $(el).append(html);
 
-            pager.show(el, pager.getNormalNum());
-            form.first(pager.getNormalNum());
-            pager.init();
-        });
-
-        if ((pager.getShowMode() === false) && (lsInputData !== null)) {
-            $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
-        }
-
-        var mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
-        if (pager.getShowMode() === true) {
-            mc.get('swipe').set({direction: Hammer.DIRECTION_ALL});
-        } else {
-            mc.get('swipe').set({direction: Hammer.DIRECTION_HORIZONTAL});
-        }
+        let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
+        mc.get('swipe').set({direction: Hammer.DIRECTION_ALL});
 
         mc.on('swiperight', () => {
             console.log('swipe right');
@@ -355,6 +276,79 @@ jQuery.noConflict();
             }
         });
 
+        return event;
+    }
+
+    let showSwipeViewForWrite = (event) => {
+        let el = kintone.mobile.app.record.getSpaceElement(pluginConfig.svSpace);
+
+        let style = '';
+        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
+        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
+        style += 'background-color: gold; opacity: 0.6;';
+        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
+        $(el).append(html);
+
+        form.groupList = JSON.parse(pluginConfig.svGroupListForWrite);
+        pager.setMax(form.groupList.length);
+
+        pager.show(el, pager.getNormalNum());
+        form.first(pager.getNormalNum());
+        pager.init();
+
+        if (lsInputData !== null) {
+            $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
+        }
+
+        let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
+        mc.get('swipe').set({direction: Hammer.DIRECTION_HORIZONTAL});
+
+        mc.on('swiperight', () => {
+            console.log('swipe right');
+            let before = pager.getPage();
+            let current = before + 1;
+            if (current >= pager.getMax()) {
+                return;
+            }
+
+            if (pager.isNoInputsPage(current) === true) {
+                form.noInputs(pager.getNoInputsNum());
+            } else if (pager.isAllPage(current) === true) {
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
+
+            pager.passive(before);
+            pager.active(current);
+
+            pager.setPage(current);
+        });
+
+        mc.on('swipeleft', () => {
+            console.log('swipe left');
+            let before = pager.getPage();
+            let current = before - 1;
+            if (current < 0) {
+                return;
+            }
+
+            if (pager.isNoInputsPage(current) === true) {
+                form.noInputs(pager.getNoInputsNum());
+            } else if (pager.isAllPage(current) === true) {
+                form.active(current);
+            } else {
+                form.passive(before);
+                form.active(current);
+            }
+
+            pager.passive(before);
+            pager.active(current);
+
+            pager.setPage(current);
+        });
+
         $(document).on('click touchstart', 'span#ok', restore);
 
         return event;
@@ -376,6 +370,7 @@ jQuery.noConflict();
         let fieldCode = event.type.replace(/.*\./, '');
 
         lsInputJson[fieldCode] = value;
+        console.log('koko', lsInputKey);
         localStorage.setItem(lsInputKey, JSON.stringify(lsInputJson));
 
         if (value !== '' && value !== undefined) {
@@ -392,12 +387,16 @@ jQuery.noConflict();
 
 
 
-    let showEvent = [
-        'mobile.app.record.detail.show',
+    let readEvent = [
+        'mobile.app.record.detail.show'
+    ];
+    kintone.events.on(readEvent, showSwipeViewForRead);
+
+    let writeEvent = [
         'mobile.app.record.create.show',
         'mobile.app.record.edit.show'
     ];
-    kintone.events.on(showEvent, showSwipeView);
+    kintone.events.on(writeEvent, showSwipeViewForWrite);
 
 
 
@@ -405,6 +404,9 @@ jQuery.noConflict();
         'mobile.app.record.create.change.ドロップダウン',
         'mobile.app.record.create.change.ユーザー選択',
         'mobile.app.record.create.change.チェックボックス',
+        'mobile.app.record.edit.change.ドロップダウン',
+        'mobile.app.record.edit.change.ユーザー選択',
+        'mobile.app.record.edit.change.チェックボックス'
     ];
     kintone.events.on(changeEvent, change);
 
@@ -450,4 +452,5 @@ jQuery.noConflict();
 
         pager.setPage(current);
     });
+
 })(jQuery, kintone.$PLUGIN_ID);
