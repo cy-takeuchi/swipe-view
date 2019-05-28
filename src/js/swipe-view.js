@@ -5,11 +5,13 @@ jQuery.noConflict();
     let pluginConfig = {};
     try {
         pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
+        for (let key of Object.keys(pluginConfig)) {
+            pluginConfig[key] = JSON.parse(pluginConfig[key]);
+        }
     } catch (e) {
         console.log(`[ERROR]: ${e}`);
         return;
     }
-    console.log(pluginConfig);
 
     const conn = new kintoneJSSDK.Connection();
     const kintoneApp = new kintoneJSSDK.App(conn);
@@ -176,7 +178,7 @@ jQuery.noConflict();
 
         pager.setShowMode(true);
 
-        form.groupList = JSON.parse(pluginConfig.svGroupListForRead);
+        form.groupList = pluginConfig.svGroupListForRead;
         pager.setMax(form.groupList.length);
 
         pager.show(el, pager.getNormalNum());
@@ -271,7 +273,7 @@ jQuery.noConflict();
 
         pager.setShowMode(false);
 
-        form.groupList = JSON.parse(pluginConfig.svGroupListForWrite);
+        form.groupList = pluginConfig.svGroupListForWrite;
         pager.setMax(form.groupList.length);
 
         pager.show(el, pager.getNormalNum());
@@ -375,36 +377,29 @@ jQuery.noConflict();
 
 
 
-    let readEvent = [
+    let readEventList = [
         'mobile.app.record.detail.show'
     ];
-    kintone.events.on(readEvent, showSwipeViewForRead);
+    kintone.events.on(readEventList, showSwipeViewForRead);
 
-    let writeEvent = [
+    let writeEventList = [
         'mobile.app.record.create.show',
         'mobile.app.record.edit.show'
     ];
-    kintone.events.on(writeEvent, showSwipeViewForWrite);
+    kintone.events.on(writeEventList, showSwipeViewForWrite);
 
 
 
-    let changeEvent = [
-        'mobile.app.record.create.change.ドロップダウン',
-        'mobile.app.record.create.change.ユーザー選択',
-        'mobile.app.record.create.change.チェックボックス',
-        'mobile.app.record.edit.change.ドロップダウン',
-        'mobile.app.record.edit.change.ユーザー選択',
-        'mobile.app.record.edit.change.チェックボックス'
-    ];
+    let changeEvent = pluginConfig.changeEventList;
     kintone.events.on(changeEvent, change);
 
 
 
-    let submitSuccessEvent = [
+    let submitSuccessEventList = [
         'mobile.app.record.create.submit.success',
         'mobile.app.record.edit.submit.success'
     ];
-    kintone.events.on(submitSuccessEvent, (event) => {
+    kintone.events.on(submitSuccessEventList, (event) => {
         localStorage.removeItem(lsInputKey);
         return event;
     });

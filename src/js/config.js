@@ -84,10 +84,16 @@ jQuery.noConflict();
             let svGroupListForWrite = svGroupListForRead.concat(itemAllList);
 
             let newConfig = {};
-            newConfig.svSpace = $svSpace.val();
+            newConfig.svSpace = JSON.stringify($svSpace.val());
             newConfig.svGroupListForRead = JSON.stringify(svGroupListForRead);
             newConfig.svGroupListForWrite = JSON.stringify(svGroupListForWrite);
-            console.log(newConfig);
+
+            let changeEventList = [];
+            for (let key of Object.keys(itemAllList)) {
+                changeEventList.push(`mobile.app.record.create.change.${key}`);
+                changeEventList.push(`mobile.app.record.edit.change.${key}`);
+            }
+            newConfig.changeEventList = JSON.stringify(changeEventList);
 
             kintone.plugin.app.setConfig(newConfig, () => {
                 alert('Please update the app!');
