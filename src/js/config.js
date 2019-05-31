@@ -69,9 +69,11 @@ jQuery.noConflict();
 
 
     var config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    /*
     if (config.svSpace) {
         $svSpace.val(config.svSpace);
     }
+    */
 
     $svForm.on('submit', (e) => {
         e.preventDefault();
@@ -84,7 +86,7 @@ jQuery.noConflict();
             let svGroupListForWrite = svGroupListForRead.concat(itemAllList);
 
             let newConfig = {};
-            newConfig.svSpace = JSON.stringify($svSpace.val());
+            //newConfig.svSpace = JSON.stringify($svSpace.val());
             newConfig.svGroupListForRead = JSON.stringify(svGroupListForRead);
             newConfig.svGroupListForWrite = JSON.stringify(svGroupListForWrite);
 
@@ -95,6 +97,7 @@ jQuery.noConflict();
             }
             newConfig.changeEventList = JSON.stringify(changeEventList);
 
+            console.log(newConfig);
             kintone.plugin.app.setConfig(newConfig, () => {
                 alert('Please update the app!');
                 window.location.href = getSettingsUrl();
