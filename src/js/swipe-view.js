@@ -21,7 +21,7 @@ jQuery.noConflict();
     const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
 
     const swipeSpaceId = 'cy-swipe';
-    const listId = 'cy-ul';
+    const pagerId = 'sv-pager';
 
     let lsInputData = localStorage.getItem(lsInputKey);
     let lsInputJson = {};
@@ -86,10 +86,7 @@ jQuery.noConflict();
     }
 
     class Pager {
-        constructor(id) {
-            this.id = id;
-            this.el = `ul#${id} li`;
-
+        constructor() {
             this.current = 0;
             this.min = 0;
             this.max = 0;
@@ -147,7 +144,7 @@ jQuery.noConflict();
             let html = '';
             html += '<div>';
 
-            html += `<ul id="${this.id}" style="display: inline-block; margin: 20px; padding: 0px;">`;
+            html += `<ul id="${pagerId}" style="display: inline-block; margin: 20px; padding: 0px;">`;
             for (let i = 0; i < num; i++) {
                 html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">${i + 1}</a></li>`;
             }
@@ -163,13 +160,13 @@ jQuery.noConflict();
         }
 
         active(num) {
-            $(this.el).eq(num).css('background-color', 'gold');
-            $(this.el).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'bold');
+            $(`ul#${pagerId} li`).eq(num).css('background-color', 'gold');
+            $(`ul#${pagerId} li`).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'bold');
         }
 
         passive(num) {
-            $(this.el).eq(num).css('background-color', 'white');
-            $(this.el).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'normal');
+            $(`ul#${pagerId} li`).eq(num).css('background-color', 'white');
+            $(`ul#${pagerId} li`).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'normal');
         }
     }
 
@@ -373,7 +370,7 @@ jQuery.noConflict();
 
 
     let form = new Form();
-    let pager = new Pager(listId);
+    let pager = new Pager();
 
 
 
@@ -417,7 +414,7 @@ jQuery.noConflict();
 
 
 
-    $(document).on('click', `ul#${listId} li`, (event) => {
+    $(document).on('click', `ul#${pagerId} li`, (event) => {
         let before = pager.getCurrentPage();
         let current = $(event.currentTarget).index();
 
