@@ -143,30 +143,27 @@ jQuery.noConflict();
         show(el, num) {
             let html = '';
             html += '<div>';
-
-            html += `<ul id="${pagerId}" style="display: inline-block; margin: 20px; padding: 0px;">`;
+            html += `<ul id="${pagerId}">`;
             for (let i = 0; i < num; i++) {
-                html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">${i + 1}</a></li>`;
+                html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
             }
 
             if (this.getShowMode() === false) {
-                html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">未入力項目</a></li>`;
+                html += `<li><a href="javascript:void(0)">未入力項目</a></li>`;
             }
-            html += `<li style="display: inline; padding: 8px 16px;"><a href="javascript:void(0)">全項目</a></li>`;
+            html += `<li><a href="javascript:void(0)">全項目</a></li>`;
             html += '</ul>';
             html += '</div>';
 
-            $(el).append(html);
+            $(el).append(html);;
         }
 
         active(num) {
-            $(`ul#${pagerId} li`).eq(num).css('background-color', 'gold');
-            $(`ul#${pagerId} li`).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'bold');
+            $(`ul#${pagerId} li`).eq(num).addClass('sv-pager-active');
         }
 
         passive(num) {
-            $(`ul#${pagerId} li`).eq(num).css('background-color', 'white');
-            $(`ul#${pagerId} li`).eq(num).children('a').css('color', 'royalblue').css('font-weight', 'normal');
+            $(`ul#${pagerId} li`).eq(num).removeClass('sv-pager-active');
         }
     }
 
@@ -182,11 +179,7 @@ jQuery.noConflict();
         form.first(pager.getNormalNum());
         pager.init();
 
-        let style = '';
-        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
-        style += 'background-color: gold; opacity: 0.6;';
-        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
+        let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
 
         let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
@@ -282,10 +275,7 @@ jQuery.noConflict();
         }
 
         let style = '';
-        style += 'width: 100%; padding: 5px; line-height: 3; text-align: center;';
-        style += 'z-index: 999; position: fixed; bottom: 70px; transform: translate3d(0, 0, 0);';
-        style += 'background-color: gold; opacity: 0.6;';
-        let html = `<div id="${swipeSpaceId}" style="${style}">ここをスワイプぅ</div>`;
+        let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
 
         let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});

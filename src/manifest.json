@@ -34,6 +34,9 @@
       "js/kintone-js-sdk.min.js",
       "js/hammer-2.0.8.min.js",
       "js/swipe-view.js"
+    ],
+    "css": [
+      "css/swipe-view.css"
     ]
   }
 }

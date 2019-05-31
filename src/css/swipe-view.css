@@ -1,0 +1,31 @@
+ul#sv-pager {
+    display: inline-block;
+    margin: 20px;
+    padding: 0px;
+}
+
+ul#sv-pager li {
+    display: inline;
+    padding: 8px 16px;
+}
+
+li.sv-pager-active {
+    background-color: gold
+}
+li.sv-pager-active a {
+    color: royalblue;
+    font-weight: bold
+}
+
+div#sv-swipe {
+    width: 100%;
+    padding: 5px;
+    line-height: 3;
+    text-align: center;
+    z-index: 999;
+    position: fixed;
+    bottom: 70px;
+    transform: translate3d(0, 0, 0);
+    background-color: gold;
+    opacity: 0.6;
+}
