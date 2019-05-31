@@ -19,6 +19,7 @@ jQuery.noConflict();
     const subdomain = window.location.hostname.split('.')[0];
     const lsInputKey = `sv-${subdomain}-${appId}-input`; // 入力したフィールドの保存用
     const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
+    const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
 
     const swipeSpaceId = 'sv-swipe';
     const pagerId = 'sv-pager';
@@ -33,6 +34,12 @@ jQuery.noConflict();
     let lsListJson = {};
     if (lsListData !== null) {
         lsListJson = JSON.parse(lsListData);
+    }
+
+    let lsInitialData = localStorage.getItem(lsInitialKey);
+    let lsInitialNum = 0;
+    if (lsInitialData !== null) {
+        lsInitialNum = JSON.parse(lsInitialData);
     }
 
     class Form {
@@ -53,12 +60,12 @@ jQuery.noConflict();
             }
         }
 
-        // 初期表示用
-        first(num) {
-            // 最初のグループリストは表示するから開始は1
-            // 未入力項目以前が対象
-            for (let i = 1; i < num; i++) {
+        initialView(initialNum, normalMaxNum) {
+            for (let i = 0; i < normalMaxNum; i++) {
                 let group = this.groupList[i];
+                if (i === initialNum) {
+                    continue;
+                }
                 for (let fieldCode of Object.keys(this.groupList[i])) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, false);
                 }
@@ -86,12 +93,11 @@ jQuery.noConflict();
     }
 
     class Pager {
-        constructor() {
-            this.current = 0;
+        constructor(initialNum) {
             this.min = 0;
             this.max = 0;
 
-            this.setCurrentPage(0);
+            this.setCurrentPage(initialNum);
 
             this.showMode = false;
         }
@@ -136,16 +142,20 @@ jQuery.noConflict();
             this.current = num;
         }
 
-        init() {
-            $(`ul#${pagerId} li`).eq(0).click();
+        initialView(lsInitialNum) {
+            $(`ul#${pagerId} li`).eq(lsInitialNum).click();
         }
 
-        show(el, num) {
+        show(el, initialNum, normalMaxNum) {
             let html = '';
             html += '<div>';
             html += `<ul id="${pagerId}">`;
-            for (let i = 0; i < num; i++) {
-                html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
+            for (let i = 0; i < normalMaxNum; i++) {
+                if (i === initialNum) {
+                    html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
+                } else {
+                    html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
+                }
             }
 
             if (this.getShowMode() === false) {
@@ -155,7 +165,9 @@ jQuery.noConflict();
             html += '</ul>';
             html += '</div>';
 
-            $(el).append(html);;
+            $(el).append(html);
+
+            this.active(initialNum);
         }
 
         active(num) {
@@ -175,9 +187,8 @@ jQuery.noConflict();
         form.groupList = pluginConfig.svGroupListForRead;
         pager.setMax(form.groupList.length);
 
-        pager.show(el, pager.getNormalNum());
-        form.first(pager.getNormalNum());
-        pager.init();
+        pager.show(el, lsInitialNum, pager.getNormalNum());
+        form.initialView(lsInitialNum, pager.getNormalNum());
 
         let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
@@ -238,6 +249,8 @@ jQuery.noConflict();
             let index = lsListJson.indexOf(recordId);
             let nextRecordId = lsListJson[index + 1];
             if (nextRecordId !== undefined) {
+                // 選択している項目を次レコードの初期値として利用する
+                localStorage.setItem(lsInitialKey, JSON.stringify(pager.getCurrentPage()));
                 let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
                 location.href = newUrl;
             }
@@ -250,6 +263,8 @@ jQuery.noConflict();
             let index = lsListJson.indexOf(recordId);
             let nextRecordId = lsListJson[index - 1];
             if (nextRecordId !== undefined) {
+                // 選択している項目を次レコードの初期値として利用する
+                localStorage.setItem(lsInitialKey, JSON.stringify(pager.getCurrentPage()));
                 let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
                 location.href = newUrl;
             }
@@ -266,9 +281,8 @@ jQuery.noConflict();
         form.groupList = pluginConfig.svGroupListForWrite;
         pager.setMax(form.groupList.length);
 
-        pager.show(el, pager.getNormalNum());
-        form.first(pager.getNormalNum());
-        pager.init();
+        pager.show(el, lsInitialNum, pager.getNormalNum());
+        form.initialView(lsInitialNum, pager.getNormalNum());
 
         if (lsInputData !== null) {
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
@@ -360,7 +374,7 @@ jQuery.noConflict();
 
 
     let form = new Form();
-    let pager = new Pager();
+    let pager = new Pager(lsInitialNum);
 
 
 
