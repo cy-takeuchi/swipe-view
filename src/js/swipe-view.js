@@ -20,7 +20,7 @@ jQuery.noConflict();
     const lsInputKey = `sv-${subdomain}-${appId}-input`; // 入力したフィールドの保存用
     const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
 
-    const swipeSpaceId = 'cy-swipe';
+    const swipeSpaceId = 'sv-swipe';
     const pagerId = 'sv-pager';
 
     let lsInputData = localStorage.getItem(lsInputKey);
