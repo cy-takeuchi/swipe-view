@@ -137,7 +137,7 @@ jQuery.noConflict();
         }
 
         init() {
-            $(this.el).eq(0).click();
+            $(`ul#${pagerId} li`).eq(0).click();
         }
 
         show(el, num) {
