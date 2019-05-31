@@ -14,7 +14,7 @@ jQuery.noConflict();
     }
 
     let grouping = async () => {
-        let res = await kintoneApp.getFormLayout(appId);
+        let res = await kintoneApp.getFormLayout(appId, true);
         let layout = res.layout;
 
         let itemList = [], item = {}, all = {};
