@@ -17,7 +17,7 @@ jQuery.noConflict();
         let res = await kintoneApp.getFormLayout(appId, true);
         let layout = res.layout;
 
-        let itemList = [], item = {}, all = {};
+        let itemList = [], item = {};
         for (let i of Object.keys(layout)) {
             let type = layout[i].type;
             if (type === 'GROUP' || type === 'SUBTABLE') {
@@ -26,7 +26,6 @@ jQuery.noConflict();
                     empty: true
                 }
                 item[fieldCode] = obj;
-                all[fieldCode] = obj;
             } else if (type === 'ROW') {
                 let fields = layout[i].fields;
                 for (let j = 0; j < fields.length; j++) {
@@ -37,11 +36,7 @@ jQuery.noConflict();
                         empty: true
                     }
 
-                    if (fieldType === 'SPACER') {
-                        if (id === 'swipe') {
-                            continue;
-                        }
-                    } else if (fieldType === 'HR') {
+                    if (fieldType === 'HR') {
                         continue;
                     }
 
@@ -52,7 +47,6 @@ jQuery.noConflict();
                         }
                     } else {
                         item[fieldCode] = obj;
-                        all[fieldCode] = obj;
                     }
                 }
             }
@@ -79,9 +73,10 @@ jQuery.noConflict();
         e.preventDefault();
 
         grouping().then((itemGroupList) => {
-            let itemAllList = itemGroupList.reduce((pre, current) => {
-                return Object.assign(pre, current);
-            });
+            let itemAllList = {};
+            for (let i = 0; i < Object.keys(itemGroupList).length; i++) {
+                Object.assign(itemAllList, itemGroupList[i]);
+            }
             let svGroupListForRead = itemGroupList.concat(itemAllList);
             let svGroupListForWrite = svGroupListForRead.concat(itemAllList);
 
@@ -97,7 +92,6 @@ jQuery.noConflict();
             }
             newConfig.changeEventList = JSON.stringify(changeEventList);
 
-            console.log(newConfig);
             kintone.plugin.app.setConfig(newConfig, () => {
                 alert('Please update the app!');
                 window.location.href = getSettingsUrl();
