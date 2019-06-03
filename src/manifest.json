@@ -13,11 +13,13 @@
     "html": "html/config.html",
     "js": [
       "js/jquery-3.4.1.min.js",
-      "js/kintone-js-sdk.min.js",
+      "js/kintone-js-sdk-0.3.0.min.js",
+      "js/kintone-ui-component-0.2.0.min.js",
       "js/config.js"
     ],
     "css": [
-      "css/51-modern-default.css"
+      "css/kintone-ui-component-0.2.0.min.css",
+      "css/config.css"
     ],
     "required_params": [
     ]
@@ -31,7 +33,7 @@
   "mobile": {
     "js": [
       "js/jquery-3.4.1.min.js",
-      "js/kintone-js-sdk.min.js",
+      "js/kintone-js-sdk-0.3.0.min.js",
       "js/hammer-2.0.8.min.js",
       "js/swipe-view.js"
     ],
