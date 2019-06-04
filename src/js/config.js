@@ -47,10 +47,9 @@ jQuery.noConflict();
                     column0: '×'
                 });
 
-                groupList[0][fieldCode].value = {
+                groupList[0][fieldCode] = {
                     //required: fieldRequired,
-                    //empty: true,
-                    value: '×'
+                    shown: false
                 };
 
                 num++;
@@ -77,7 +76,6 @@ jQuery.noConflict();
 
                     groupList[0][fieldCode] = {
                         //required: fieldRequired,
-                        //empty: true,
                         shown: false
                     };
 
@@ -112,10 +110,16 @@ jQuery.noConflict();
         return item;
     }
 
-    let pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
-    let originalGroupList = JSON.parse(pluginConfig.svGroupList);
-    console.log('save data', originalGroupList);
-    //return false;
+    let originalPluginConfig = {};
+    try {
+        originalPluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
+        for (let key of Object.keys(originalPluginConfig)) {
+            originalPluginConfig[key] = JSON.parse(originalPluginConfig[key]);
+        }
+    } catch (e) {
+        console.log(`[ERROR]: ${e}`);
+        return;
+    }
 
     let saveButton = new kintoneUIComponent.Button({
         text: 'Save',
@@ -126,9 +130,35 @@ jQuery.noConflict();
     getFormFields().then((array) => {
         let itemList = array[0];
         let groupList = array[1];
+        let originalGroupList = originalPluginConfig.svGroupList;
 
-        let columnNum = 0;
-        let columnList = [columnNum];
+        let columnNum = 0, columnList = [];
+        if (originalGroupList === undefined) { // プラグイン未設定の場合
+            columnNum = 0;
+            columnList = [columnNum];
+            $('div#sv-list thead tr').append('<th>0<span class="sv-minus">-</span><span class="sv-plus">+</span></th>');
+        } else { // プラグイン設定済みの場合
+            let i = 0;
+            for (; i < originalGroupList.length; i++) {
+                columnList.push(i);
+                $('div#sv-list thead tr').append(`<th>${i}<span class="sv-minus">-</span><span class="sv-plus">+</span></th>`);
+            }
+            columnNum = i - 1;
+
+            for (let j = 0; j < itemList.length; j++) {
+                let fieldCode = itemList[j].code;
+                for (let k = 0; k < originalGroupList.length; k++) {
+                    if (originalGroupList[k][fieldCode].shown === true) {
+                        itemList[j][`column${k}`] = '〇';
+                    } else if (originalGroupList[k][fieldCode].shown === false) {
+                        itemList[j][`column${k}`] = '×';
+                    }
+                }
+            }
+
+            groupList = originalGroupList;
+        }
+
         let options = {
             valueNames: createValueNames(columnList),
             item: createListHeader(columnList)
@@ -183,8 +213,8 @@ jQuery.noConflict();
 
             // groupList
             insertToArray(groupList, index + 1, $.extend(true, {}, groupList[index]));
-            for (let k of Object.keys(groupList[index + 1])) {
-                groupList[index + 1][k].shown = false; // groupListの初期化
+            for (let fieldCode of Object.keys(groupList[index + 1])) {
+                groupList[index + 1][fieldCode].shown = false; // groupListの初期化
             }
 
             // list
@@ -232,7 +262,6 @@ jQuery.noConflict();
             let $target = $(e.currentTarget);
             list.search($target.val(), ['code', 'label']);
         });
-
 
         $('div#sv-save').on('click', (e) => {
             e.preventDefault();
