@@ -24,8 +24,8 @@ jQuery.noConflict();
         res = await kintoneApp.getFormFields(appId, 'DEFAULT', true);
         let fieldPropertyList = res.properties;
 
-        let itemList = [], configList = [], num = 0;
-        configList[0] = {};
+        let itemList = [], groupList = [], num = 0;
+        groupList[0] = {};
         for (let i of Object.keys(formLayoutList)) {
             let type = formLayoutList[i].type;
             if (type === 'GROUP' || type === 'SUBTABLE') {
@@ -38,22 +38,20 @@ jQuery.noConflict();
                 }
                 let fieldRequired = fieldPropertyList[fieldCode].required;
 
-                let item = {
+                itemList.push({
                     num: num,
                     label: fieldLabel,
                     code: fieldCode,
                     type: type,
                     //required: fieldRequired,
-                    flag0: '×'
-                }
-                itemList.push(item);
+                    column0: '×'
+                });
 
-                let config = {
+                groupList[0][fieldCode].value = {
                     //required: fieldRequired,
                     //empty: true,
                     value: '×'
-                }
-                configList[0][fieldCode] = config;
+                };
 
                 num++;
             } else if (type === 'ROW') {
@@ -68,35 +66,33 @@ jQuery.noConflict();
                     let fieldLabel = fieldPropertyList[fieldCode].label;
                     let fieldRequired = fieldPropertyList[fieldCode].required;
 
-                    let item = {
+                    itemList.push({
                         num: num,
                         label: fieldLabel,
                         code: fieldCode,
                         type: fieldType,
                         //required: fieldRequired,
-                        flag0: '×'
-                    }
-                    itemList.push(item);
+                        column0: '×'
+                    });
 
-                    let config = {
+                    groupList[0][fieldCode] = {
                         //required: fieldRequired,
                         //empty: true,
                         shown: false
-                    }
-                    configList[0][fieldCode] = config;
+                    };
 
                     num++;
                 }
             }
         }
 
-        return [itemList, configList];
+        return [itemList, groupList];
     }
 
     let createValueNames = (columnList) => {
         let valueNames = ['num', 'code', 'label', 'type'];
         for (let column of columnList) {
-            valueNames.push(`flag${column}`);
+            valueNames.push(`column${column}`);
         }
 
         return valueNames;
@@ -109,14 +105,17 @@ jQuery.noConflict();
         item += '<td class="code"></td>';
         item += '<td class="type"></td>';
         for (let column of columnList) {
-            item += `<td><div class="flag${column}"></div></td>`;
+            item += `<td><div class="column${column}"></div></td>`;
         }
         item += '</tr>';
 
         return item;
     }
 
-    var config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    let pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
+    let originalGroupList = JSON.parse(pluginConfig.svGroupList);
+    console.log('save data', originalGroupList);
+    //return false;
 
     let saveButton = new kintoneUIComponent.Button({
         text: 'Save',
@@ -126,7 +125,7 @@ jQuery.noConflict();
 
     getFormFields().then((array) => {
         let itemList = array[0];
-        let configList = array[1];
+        let groupList = array[1];
 
         let columnNum = 0;
         let columnList = [columnNum];
@@ -138,7 +137,7 @@ jQuery.noConflict();
         let list = new List('sv-list', options, itemList);
 
         // columntList = [0, 3, 2, 1]で2列目（4番目に追加された列）がクリックされた場合
-        // configListは1を取得したい（クリックされた列番号）
+        // groupListは1を取得したい（クリックされた列番号）
         // itemListは3を取得したい（クリックされた列番号の値）
         $(document).on('click', 'div#sv-list td div', (e) => {
             let $target = $(e.currentTarget);
@@ -146,26 +145,26 @@ jQuery.noConflict();
 
             let configIndex = $target.parent('td')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
 
-            // configList
+            // groupList
             let fieldCode = $($target.parents('tr').children('td')[2]).text();
-            if (configList[configIndex][fieldCode] === undefined) {
-                configList[configIndex][fieldCode] = {};
-                configList[configIndex][fieldCode].shown = true;
+            if (groupList[configIndex][fieldCode] === undefined) {
+                groupList[configIndex][fieldCode] = {};
+                groupList[configIndex][fieldCode].shown = true;
             } else {
-                configList[configIndex][fieldCode].shown = true; // configListのデータを更新
+                groupList[configIndex][fieldCode].shown = true; // groupListのデータを更新
             }
 
             // itemList
             let itemIndex = columnList[configIndex];
             let num = $($target.parents('tr').children('td')[0]).text();
             let item = itemList.find(item => item.num === Number(num));
-            item[`flag${itemIndex}`] = '〇'; // itemListのデータを更新
+            item[`column${itemIndex}`] = '〇'; // itemListのデータを更新
         });
 
         /*
         $(document).on('click', 'div#sv-list th', (e) => {
             list.filter((item) => {
-                return item.values().flag0 === '〇' ? true : false;
+                return item.values().column0 === '〇' ? true : false;
             });
         });
         */
@@ -182,10 +181,10 @@ jQuery.noConflict();
             // 何列目がクリックされたか
             let index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
 
-            // configList
-            insertToArray(configList, index + 1, $.extend(true, {}, configList[index]));
-            for (let k of Object.keys(configList[index + 1])) {
-                configList[index + 1][k].shown = false; // configListの初期化
+            // groupList
+            insertToArray(groupList, index + 1, $.extend(true, {}, groupList[index]));
+            for (let k of Object.keys(groupList[index + 1])) {
+                groupList[index + 1][k].shown = false; // groupListの初期化
             }
 
             // list
@@ -195,7 +194,7 @@ jQuery.noConflict();
                 item: createListHeader(columnList)
             };
             itemList.forEach((item) => {
-                item[`flag${columnNum}`] = '×'; // itemListの初期化
+                item[`column${columnNum}`] = '×'; // itemListの初期化
             });
             list = new List('sv-list', options, itemList);
         });
@@ -214,8 +213,8 @@ jQuery.noConflict();
             // テーブルヘッダー
             $target.parent('th').remove();
 
-            // configList
-            configList = configList.filter((ele, i) => i !== index);
+            // groupList
+            groupList = groupList.filter((ele, i) => i !== index);
 
             // list
             columnList = columnList.filter((ele, i) => i !== index);
@@ -224,7 +223,7 @@ jQuery.noConflict();
                 item: createListHeader(columnList)
             };
             itemList.forEach((item) => {
-                delete item[`flag${itemIndex}`];
+                delete item[`column${itemIndex}`];
             });
             list = new List('sv-list', options, itemList);
         });
@@ -238,26 +237,26 @@ jQuery.noConflict();
         $('div#sv-save').on('click', (e) => {
             e.preventDefault();
 
-            let newConfig = {};
-            newConfig.svGroupList = JSON.stringify(configList);
+            let newPluginConfig = {};
+            newPluginConfig.svGroupList = JSON.stringify(groupList);
 
             // 未入力項目用の列を追加
-            let noInputs = $.extend(true, {}, configList[0]);
+            let noInputs = $.extend(true, {}, groupList[0]);
             for (let fieldCode of Object.keys(noInputs)) {
                 delete noInputs[fieldCode].shown;
                 noInputs[fieldCode].empty = true;
             }
-            newConfig.svNoInputs = JSON.stringify(noInputs);
+            newPluginConfig.svNoInputs = JSON.stringify(noInputs);
 
             let changeEventList = [];
-            for (let fieldCode of Object.keys(configList[0])) {
+            for (let fieldCode of Object.keys(groupList[0])) {
                 changeEventList.push(`mobile.app.record.create.change.${fieldCode}`);
                 changeEventList.push(`mobile.app.record.edit.change.${fieldCode}`);
             }
 
-            newConfig.changeEventList = JSON.stringify(changeEventList);
+            newPluginConfig.changeEventList = JSON.stringify(changeEventList);
 
-            kintone.plugin.app.setConfig(newConfig, () => {
+            kintone.plugin.app.setConfig(newPluginConfig, () => {
                 alert('Please update the app!');
                 window.location.href = getSettingsUrl();
             });
