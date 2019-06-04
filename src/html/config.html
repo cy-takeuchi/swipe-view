@@ -1,9 +1,20 @@
 <section class="settings">
   <h2 class="settings-heading">Settings for swipe-view</h2>
-  <p class="kintoneplugin-desc"></p>
-  <form id="sv-form">
-    <p class="kintoneplugin-row">
-        <button class="kintoneplugin-button-dialog-ok">Save</button>
-    </p>
-  </form>
+  <div id="sv-save"></div>
+
+  <div id="sv-list">
+    <input class="sv-search" placeholder="検索" />
+    <table>
+      <thead>
+        <th class="sv-display-none">No</th>
+        <th>ラベル</th>
+        <th>コード</th>
+        <th>タイプ</th>
+        <th>0 <span class="sv-minus">-</span><span class="sv-plus">+</span></th>
+      </thead>
+      <tbody class="list">
+      </tbody>
+    </table>
+  </div>
+
 </section>

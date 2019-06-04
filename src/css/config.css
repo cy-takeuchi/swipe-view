@@ -1,0 +1,28 @@
+div#sv-list th {
+    padding: 8px 16px;
+}
+
+div#sv-list td {
+    padding: 8px 16px;
+}
+
+div#sv-list td div {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+div#sv-list td.label, div#sv-list td.code, div#sv-list td.type {
+    width: 200px;
+}
+
+div#sv-list .sv-display-none {
+    display: none;
+}
+
+div#sv-list span.sv-plus {
+    cursor: pointer;
+}
+
+div#sv-list span.sv-minus {
+    cursor: pointer;
+}

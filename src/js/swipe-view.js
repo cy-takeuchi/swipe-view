@@ -45,50 +45,45 @@ jQuery.noConflict();
     class Form {
         constructor() {
             this.groupList = [];
+            this.noInputs = {};
             this.showMode = false;
         }
 
-        active(num) {
-            for (let fieldCode of Object.keys(this.groupList[num])) {
-                kintone.mobile.app.record.setFieldShown(fieldCode, true);
+        change(current, before) {
+            if (pager.isNoInputsPage(before) === true) {
+                for (let fieldCode of Object.keys(this.groupList[current])) {
+                    if (this.groupList[current][fieldCode].shown !== this.noInputs[fieldCode].empty) {
+                        kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[current][fieldCode].shown);
+                    }
+                }
+            } else {
+                for (let fieldCode of Object.keys(this.groupList[current])) {
+                    if (this.groupList[current][fieldCode].shown !== this.groupList[before][fieldCode].shown) {
+                        kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[current][fieldCode].shown);
+                    }
+                }
             }
         }
 
-        passive(num) {
-            for (let fieldCode of Object.keys(this.groupList[num])) {
-                kintone.mobile.app.record.setFieldShown(fieldCode, false);
-            }
-        }
-
-        initialView(initialNum, normalMaxNum) {
-            for (let i = 0; i < normalMaxNum; i++) {
-                let group = this.groupList[i];
-                if (i === initialNum) {
-                    continue;
-                }
-                for (let fieldCode of Object.keys(this.groupList[i])) {
-                    kintone.mobile.app.record.setFieldShown(fieldCode, false);
-                }
+        initialView(initialNum) {
+            for (let fieldCode of Object.keys(this.groupList[initialNum])) {
+                kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[initialNum][fieldCode].shown);
             }
         }
 
         // 未入力項目用
-        noInputs(num) {
-            for (let fieldCode of Object.keys(this.groupList[num])) {
-                if (this.groupList[num][fieldCode].empty === true) {
-                    kintone.mobile.app.record.setFieldShown(fieldCode, true);
-                } else if (this.groupList[num][fieldCode].empty === false) {
-                    kintone.mobile.app.record.setFieldShown(fieldCode, false);
-                }
+        noInputsView() {
+            for (let fieldCode of Object.keys(this.noInputs)) {
+                kintone.mobile.app.record.setFieldShown(fieldCode, this.noInputs[fieldCode].empty);
             }
         }
 
-        input(fieldCode, noInputsNum) {
-            this.groupList[noInputsNum][fieldCode].empty = false;
+        input(fieldCode) {
+            this.noInputs[fieldCode].empty = false;
         }
 
-        empty(fieldCode, noInputsNum) {
-            this.groupList[noInputsNum][fieldCode].empty = true;
+        empty(fieldCode) {
+            this.noInputs[fieldCode].empty = true;
         }
     }
 
@@ -118,20 +113,12 @@ jQuery.noConflict();
             return this.max;
         }
 
-        getNormalNum() {
-            return (this.getShowMode() === true) ? this.max - 1 : this.max - 2;
-        }
-
         getNoInputsNum() {
-            return (this.getShowMode() === true) ? null : this.max - 2;
+            return (this.getShowMode() === true) ? null : this.max - 1;
         }
 
         isNoInputsPage(num) {
             return (num === this.getNoInputsNum()) ? true : false;
-        }
-
-        isAllPage(num) {
-            return (num === this.max - 1) ? true : false;
         }
 
         getCurrentPage() {
@@ -146,28 +133,26 @@ jQuery.noConflict();
             $(`ul#${pagerId} li`).eq(lsInitialNum).click();
         }
 
-        show(el, initialNum, normalMaxNum) {
+        show(el) {
+            let max = this.getMax();
+            if (this.getShowMode() === false) {
+                max = this.getMax() - 1;
+            }
+
             let html = '';
             html += '<div>';
             html += `<ul id="${pagerId}">`;
-            for (let i = 0; i < normalMaxNum; i++) {
-                if (i === initialNum) {
-                    html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
-                } else {
-                    html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
-                }
+            for (let i = 0; i < max; i++) {
+                html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
             }
 
             if (this.getShowMode() === false) {
                 html += `<li><a href="javascript:void(0)">未入力項目</a></li>`;
             }
-            html += `<li><a href="javascript:void(0)">全項目</a></li>`;
             html += '</ul>';
             html += '</div>';
 
             $(el).append(html);
-
-            this.active(initialNum);
         }
 
         active(num) {
@@ -184,11 +169,12 @@ jQuery.noConflict();
 
         pager.setShowMode(true);
 
-        form.groupList = pluginConfig.svGroupListForRead;
+        form.groupList = pluginConfig.svGroupList;
         pager.setMax(form.groupList.length);
 
-        pager.show(el, lsInitialNum, pager.getNormalNum());
-        form.initialView(lsInitialNum, pager.getNormalNum());
+        pager.show(el);
+        pager.active(lsInitialNum);
+        form.initialView(lsInitialNum);
 
         let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
@@ -204,14 +190,7 @@ jQuery.noConflict();
                 return;
             }
 
-            if (pager.isNoInputsPage(current) === true) {
-                form.noInputs(pager.getNoInputsNum());
-            } else if (pager.isAllPage(current) === true) {
-                form.active(current);
-            } else {
-                form.passive(before);
-                form.active(current);
-            }
+            form.change(current, before);
 
             pager.passive(before);
             pager.active(current);
@@ -227,14 +206,7 @@ jQuery.noConflict();
                 return;
             }
 
-            if (pager.isNoInputsPage(current) === true) {
-                form.noInputs(pager.getNoInputsNum());
-            } else if (pager.isAllPage(current) === true) {
-                form.active(current);
-            } else {
-                form.passive(before);
-                form.active(current);
-            }
+            form.change(current, before);
 
             pager.passive(before);
             pager.active(current);
@@ -278,17 +250,18 @@ jQuery.noConflict();
 
         pager.setShowMode(false);
 
-        form.groupList = pluginConfig.svGroupListForWrite;
-        pager.setMax(form.groupList.length);
+        form.groupList = pluginConfig.svGroupList;
+        form.noInputs = pluginConfig.svNoInputs;
+        pager.setMax(form.groupList.length + 1); // +1は未入力項目分
 
-        pager.show(el, lsInitialNum, pager.getNormalNum());
-        form.initialView(lsInitialNum, pager.getNormalNum());
+        pager.show(el);
+        pager.active(lsInitialNum);
+        form.initialView(lsInitialNum);
 
         if (lsInputData !== null) {
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
-        let style = '';
         let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
 
@@ -304,12 +277,9 @@ jQuery.noConflict();
             }
 
             if (pager.isNoInputsPage(current) === true) {
-                form.noInputs(pager.getNoInputsNum());
-            } else if (pager.isAllPage(current) === true) {
-                form.active(current);
+                form.noInputsView(current);
             } else {
-                form.passive(before);
-                form.active(current);
+                form.change(current, before);
             }
 
             pager.passive(before);
@@ -327,12 +297,9 @@ jQuery.noConflict();
             }
 
             if (pager.isNoInputsPage(current) === true) {
-                form.noInputs(pager.getNoInputsNum());
-            } else if (pager.isAllPage(current) === true) {
-                form.active(current);
+                form.noInputsView(current);
             } else {
-                form.passive(before);
-                form.active(current);
+                form.change(current, before);
             }
 
             pager.passive(before);
@@ -365,9 +332,9 @@ jQuery.noConflict();
         localStorage.setItem(lsInputKey, JSON.stringify(lsInputJson));
 
         if (value !== '' && value !== undefined) {
-            form.input(fieldCode, pager.getNoInputsNum());
+            form.input(fieldCode);
         } else {
-            form.empty(fieldCode, pager.getNoInputsNum());
+            form.empty(fieldCode);
         }
     }
 
@@ -423,12 +390,9 @@ jQuery.noConflict();
         let current = $(event.currentTarget).index();
 
         if (pager.isNoInputsPage(current) === true) {
-            form.noInputs(pager.getNoInputsNum());
-        } else if (pager.isAllPage(current) === true) {
-            form.active(current);
+            form.noInputsView(current);
         } else {
-            form.passive(before);
-            form.active(current);
+            form.change(current, before);
         }
 
         pager.passive(before);
