@@ -110,6 +110,16 @@ jQuery.noConflict();
         return item;
     }
 
+    let changeMinusButton = () => {
+        let $minusButtonList = $('div#sv-list span.sv-minus');
+        let $plusButtonList = $('div#sv-list span.sv-plus');
+        if ($minusButtonList.length === 1) {
+            $minusButtonList.addClass('sv-display-none');
+        } else if ($plusButtonList.length > 1) {
+            $minusButtonList.removeClass('sv-display-none');
+        }
+    }
+
     let originalPluginConfig = {};
     try {
         originalPluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -166,6 +176,8 @@ jQuery.noConflict();
 
         let list = new List('sv-list', options, itemList);
 
+        changeMinusButton();
+
         // columntList = [0, 3, 2, 1]で2列目（4番目に追加された列）がクリックされた場合
         // groupListは1を取得したい（クリックされた列番号）
         // itemListは3を取得したい（クリックされた列番号の値）
@@ -204,9 +216,11 @@ jQuery.noConflict();
 
             columnNum++;
 
-            // テーブルヘッダー
             let $target = $(e.currentTarget);
+
+            // テーブルヘッダー
             $target.parent('th').after(`<th>${columnNum}<span class="sv-minus">-</span><span class="sv-plus">+</span></th>`);
+            changeMinusButton();
 
             // 何列目がクリックされたか
             let index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
@@ -242,6 +256,7 @@ jQuery.noConflict();
 
             // テーブルヘッダー
             $target.parent('th').remove();
+            changeMinusButton();
 
             // groupList
             groupList = groupList.filter((ele, i) => i !== index);
