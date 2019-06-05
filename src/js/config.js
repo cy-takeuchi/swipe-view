@@ -263,7 +263,7 @@ jQuery.noConflict();
             list.search($target.val(), ['code', 'label']);
         });
 
-        $('div#sv-save').on('click', (e) => {
+        saveButton.on('click', (e) => {
             e.preventDefault();
 
             let newPluginConfig = {};
