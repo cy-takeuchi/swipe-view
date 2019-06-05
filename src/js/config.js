@@ -120,6 +120,17 @@ jQuery.noConflict();
         }
     }
 
+    let createThColumn = (num) => {
+        let html = '';
+        html += '<th nowrap>';
+        html += num + '<br />';
+        html += '<span class="sv-plus">+</span>';
+        html += '<span class="sv-minus">-</span>';
+        html += '</th>';
+
+        return html;
+    }
+
     let originalPluginConfig = {};
     try {
         originalPluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -146,12 +157,12 @@ jQuery.noConflict();
         if (originalGroupList === undefined) { // プラグイン未設定の場合
             columnNum = 0;
             columnList = [columnNum];
-            $('div#sv-list thead tr').append('<th>0<span class="sv-minus">-</span><span class="sv-plus">+</span></th>');
+            $('div#sv-list thead tr').append(createThColumn(0));
         } else { // プラグイン設定済みの場合
             let i = 0;
             for (; i < originalGroupList.length; i++) {
                 columnList.push(i);
-                $('div#sv-list thead tr').append(`<th>${i}<span class="sv-minus">-</span><span class="sv-plus">+</span></th>`);
+                $('div#sv-list thead tr').append(createThColumn(i));
             }
             columnNum = i - 1;
 
@@ -219,7 +230,7 @@ jQuery.noConflict();
             let $target = $(e.currentTarget);
 
             // テーブルヘッダー
-            $target.parent('th').after(`<th>${columnNum}<span class="sv-minus">-</span><span class="sv-plus">+</span></th>`);
+            $target.parent('th').after(createThColumn(columnNum));
             changeMinusButton();
 
             // 何列目がクリックされたか
