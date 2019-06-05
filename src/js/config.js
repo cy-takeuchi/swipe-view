@@ -252,6 +252,7 @@ jQuery.noConflict();
                 item[`column${columnNum}`] = '×'; // itemListの初期化
             });
             list = new List('sv-list', options, itemList);
+            searchList();
         });
 
         // columntList = [0, 3, 2, 1]で3列目を削除する場合は[0, 3, 1]とする
@@ -282,12 +283,16 @@ jQuery.noConflict();
                 delete item[`column${itemIndex}`];
             });
             list = new List('sv-list', options, itemList);
+            searchList();
         });
 
-        $(document).on('keyup', 'input.sv-search', (e) => {
-            let $target = $(e.currentTarget);
-            list.search($target.val(), ['code', 'label']);
-        });
+        let searchList = () => {
+            let text = $('input#sv-search').val();
+            if (text !== '') {
+                list.search(text, ['code', 'label']);
+            }
+        }
+        $(document).on('keyup', 'input#sv-search', searchList);
 
         saveButton.on('click', (e) => {
             e.preventDefault();
