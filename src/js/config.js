@@ -194,24 +194,27 @@ jQuery.noConflict();
         // itemListは3を取得したい（クリックされた列番号の値）
         $(document).on('click', 'div#sv-list td div', (e) => {
             let $target = $(e.currentTarget);
-            $target.text('〇'); // 画面上のデータを更新
-
             let configIndex = $target.parent('td')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
+
+            let shown = true;
+            let value = '〇';
+            if ($target.text() === '〇') {
+                shown = false;
+                value = '×';
+            }
+
+            // 画面上
+            $target.text(value);
 
             // groupList
             let fieldCode = $($target.parents('tr').children('td')[2]).text();
-            if (groupList[configIndex][fieldCode] === undefined) {
-                groupList[configIndex][fieldCode] = {};
-                groupList[configIndex][fieldCode].shown = true;
-            } else {
-                groupList[configIndex][fieldCode].shown = true; // groupListのデータを更新
-            }
+            groupList[configIndex][fieldCode] = {shown: shown};
 
             // itemList
             let itemIndex = columnList[configIndex];
             let num = $($target.parents('tr').children('td')[0]).text();
             let item = itemList.find(item => item.num === Number(num));
-            item[`column${itemIndex}`] = '〇'; // itemListのデータを更新
+            item[`column${itemIndex}`] = value;
         });
 
         /*
