@@ -287,12 +287,26 @@ jQuery.noConflict();
         });
 
         let searchList = () => {
-            let text = $('input#sv-search').val();
-            if (text !== '') {
-                list.search(text, ['code', 'label']);
-            }
+            let label = $('input#sv-search-label').val();
+            let code = $('input#sv-search-code').val();
+            let type = $('select#sv-search-type').val();
+
+            let regexpLabel = new RegExp(label);
+            let regexpCode = new RegExp(code);
+            let regexpType = new RegExp(type);
+
+            list.filter((item) => {
+                if (item.values().label.search(regexpLabel) !== -1
+                    && item.values().code.search(regexpCode) !== -1
+                    && item.values().type.search(regexpType) !== -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         }
-        $(document).on('keyup', 'input#sv-search', searchList);
+        $(document).on('keyup', 'input#sv-search-code,input#sv-search-label', searchList);
+        $(document).on('change', 'select#sv-search-type', searchList);
 
         saveButton.on('click', (e) => {
             e.preventDefault();

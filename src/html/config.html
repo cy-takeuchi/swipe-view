@@ -2,13 +2,27 @@
   <h2 class="settings-heading">Settings for swipe-view</h2>
   <div id="sv-save"></div>
   <div id="sv-list">
-    <input id="sv-search" placeholder="検索" />
     <table>
       <thead>
         <th class="sv-display-none">No</th>
-        <th>ラベル</th>
-        <th>コード</th>
-        <th>タイプ</th>
+        <th>ラベル<br /><input id="sv-search-label" placeholder="検索" /></th>
+        <th>コード<br /><input id="sv-search-code" placeholder="検索" /></th>
+        <th>
+          タイプ<br />
+          <select id="sv-search-type">
+            <option value="">--</option>
+            <option value="SINGLE_LINE_TEXT|RICH_TEXT|MULTI_LINE_TEXT|LINK">文字</option>
+            <option value="RADIO_BUTTON|CHECK_BOX|MULTI_SELECT|DROP_DOWN">選択肢</option>
+            <option value="DATE|TIME|DATETIME">日時</option>
+            <option value="NUMBER|CALC">数値</option>
+            <option value="USER_SELECT|ORGANIZATION_SELCT|GROUP_SELECT">ユーザー</option>
+            <option value="FILE">ファイル</option>
+            <option value="SUBTABLE">テーブル</option>
+            <option value="REFERENCE_TABLE">関連レコード</option>
+            <option value="GROUP">グループ</option>
+            <option value="RECORD_NUMBER|CREATOR|CREATED_TIME|MODIFIER|UPDATED_TIME">レコード固有</option>
+          </select>
+        </th>
       </thead>
       <tbody class="list">
       </tbody>

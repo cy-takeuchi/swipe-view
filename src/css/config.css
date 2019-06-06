@@ -1,3 +1,11 @@
+div#sv-list input#sv-search-label {
+    width: 120px;
+}
+
+div#sv-list input#sv-search-code {
+    width: 120px;
+}
+
 div#sv-list th {
     padding: 8px 16px;
     text-align: center;
