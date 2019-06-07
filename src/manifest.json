@@ -16,11 +16,11 @@
       "js/kintone-js-sdk-0.3.0.min.js",
       "js/kintone-ui-component-0.2.0.min.js",
       "js/list-1.5.0.min.js",
-      "js/config.js"
+      "js/sv-config.js"
     ],
     "css": [
       "css/kintone-ui-component-0.2.0.min.css",
-      "css/config.css"
+      "css/sv-config.css"
     ],
     "required_params": [
     ]
@@ -36,10 +36,10 @@
       "js/jquery-3.4.1.min.js",
       "js/kintone-js-sdk-0.3.0.min.js",
       "js/hammer-2.0.8.min.js",
-      "js/swipe-view.js"
+      "js/sv-main.js"
     ],
     "css": [
-      "css/swipe-view.css"
+      "css/sv-main.css"
     ]
   }
 }

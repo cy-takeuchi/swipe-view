@@ -6,9 +6,6 @@ jQuery.noConflict();
     const kintoneApp = new kintoneJSSDK.App(conn);
     const appId = kintone.app.getId();
 
-    var $svForm = $('#sv-form');
-    var $svSpace = $('#sv-space');
-
     let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + appId;
     }
@@ -332,6 +329,7 @@ jQuery.noConflict();
             }
 
             newPluginConfig.changeEventList = JSON.stringify(changeEventList);
+            console.log(newPluginConfig);
 
             kintone.plugin.app.setConfig(newPluginConfig, () => {
                 alert('Please update the app!');
