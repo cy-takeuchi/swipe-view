@@ -2,12 +2,8 @@ jQuery.noConflict();
 (($, PLUGIN_ID) => {
     'use strict';
 
-    const conn = new kintoneJSSDK.Connection();
-    const kintoneApp = new kintoneJSSDK.App(conn);
-    const appId = kintone.app.getId();
-
     let getSettingsUrl = () => {
-        return '/k/admin/app/flow?app=' + appId;
+        return '/k/admin/app/flow?app=' + window.sv.appId;
     }
 
     let insertToArray = (array, index, value) => {
@@ -15,10 +11,10 @@ jQuery.noConflict();
     }
 
     let getFormFields = async () => {
-        let res = await kintoneApp.getFormLayout(appId, true);
+        let res = await window.sv.kintoneApp.getFormLayout(window.sv.appId, true);
         let formLayoutList = res.layout;
 
-        res = await kintoneApp.getFormFields(appId, 'DEFAULT', true);
+        res = await window.sv.kintoneApp.getFormFields(window.sv.appId, 'DEFAULT', true);
         let fieldPropertyList = res.properties;
 
         let itemList = [], groupList = [], num = 0;
@@ -329,7 +325,6 @@ jQuery.noConflict();
             }
 
             newPluginConfig.changeEventList = JSON.stringify(changeEventList);
-            console.log(newPluginConfig);
 
             kintone.plugin.app.setConfig(newPluginConfig, () => {
                 alert('Please update the app!');

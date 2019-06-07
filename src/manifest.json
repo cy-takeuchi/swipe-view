@@ -16,6 +16,7 @@
       "js/kintone-js-sdk-0.3.0.min.js",
       "js/kintone-ui-component-0.2.0.min.js",
       "js/list-1.5.0.min.js",
+      "js/sv-common.js",
       "js/sv-config.js"
     ],
     "css": [
@@ -36,10 +37,13 @@
       "js/jquery-3.4.1.min.js",
       "js/kintone-js-sdk-0.3.0.min.js",
       "js/hammer-2.0.8.min.js",
-      "js/sv-main.js"
+      "js/list-1.5.0.min.js",
+      "js/sv-common.js",
+      "js/sv-detail.js",
+      "js/sv-list.js"
     ],
     "css": [
-      "css/sv-main.css"
+      "css/sv-detail.css"
     ]
   }
 }

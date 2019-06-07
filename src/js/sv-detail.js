@@ -13,34 +13,8 @@ jQuery.noConflict();
         return;
     }
 
-    const conn = new kintoneJSSDK.Connection();
-    const kintoneApp = new kintoneJSSDK.App(conn);
-    const appId = kintone.mobile.app.getId();
-    const subdomain = window.location.hostname.split('.')[0];
-    const lsInputKey = `sv-${subdomain}-${appId}-input`; // 入力したフィールドの保存用
-    const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
-    const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
-
     const swipeSpaceId = 'sv-swipe';
     const pagerId = 'sv-pager';
-
-    let lsInputData = localStorage.getItem(lsInputKey);
-    let lsInputJson = {};
-    if (lsInputData !== null) {
-        lsInputJson = JSON.parse(lsInputData);
-    }
-
-    let lsListData = localStorage.getItem(lsListKey);
-    let lsListJson = {};
-    if (lsListData !== null) {
-        lsListJson = JSON.parse(lsListData);
-    }
-
-    let lsInitialData = localStorage.getItem(lsInitialKey);
-    let lsInitialNum = 0;
-    if (lsInitialData !== null) {
-        lsInitialNum = JSON.parse(lsInitialData);
-    }
 
     class Form {
         constructor() {
@@ -65,9 +39,9 @@ jQuery.noConflict();
             }
         }
 
-        initialView(initialNum) {
-            for (let fieldCode of Object.keys(this.groupList[initialNum])) {
-                kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[initialNum][fieldCode].shown);
+        initialView(num) {
+            for (let fieldCode of Object.keys(this.groupList[num])) {
+                kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[num][fieldCode].shown);
             }
         }
 
@@ -129,8 +103,8 @@ jQuery.noConflict();
             this.current = num;
         }
 
-        initialView(lsInitialNum) {
-            $(`ul#${pagerId} li`).eq(lsInitialNum).click();
+        initialView(num) {
+            $(`ul#${pagerId} li`).eq(num).click();
         }
 
         show(el) {
@@ -173,8 +147,8 @@ jQuery.noConflict();
         pager.setMax(form.groupList.length);
 
         pager.show(el);
-        pager.active(lsInitialNum);
-        form.initialView(lsInitialNum);
+        pager.active(window.sv.lsInitialNum);
+        form.initialView(window.sv.lsInitialNum);
 
         let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
         $(el).append(html);
@@ -218,11 +192,11 @@ jQuery.noConflict();
             console.log('swipe up');
             let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
             let recordId = Number(match[2]);
-            let index = lsListJson.indexOf(recordId);
-            let nextRecordId = lsListJson[index + 1];
+            let index = window.sv.lsListJson.indexOf(recordId);
+            let nextRecordId = window.sv.lsListJson[index + 1];
             if (nextRecordId !== undefined) {
                 // 選択している項目を次レコードの初期値として利用する
-                localStorage.setItem(lsInitialKey, JSON.stringify(pager.getCurrentPage()));
+                window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
                 let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
                 location.href = newUrl;
             }
@@ -232,11 +206,11 @@ jQuery.noConflict();
             console.log('swipe down');
             let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
             let recordId = Number(match[2]);
-            let index = lsListJson.indexOf(recordId);
-            let nextRecordId = lsListJson[index - 1];
+            let index = window.sv.lsListJson.indexOf(recordId);
+            let nextRecordId = window.sv.lsListJson[index - 1];
             if (nextRecordId !== undefined) {
                 // 選択している項目を次レコードの初期値として利用する
-                localStorage.setItem(lsInitialKey, JSON.stringify(pager.getCurrentPage()));
+                window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
                 let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
                 location.href = newUrl;
             }
@@ -255,10 +229,10 @@ jQuery.noConflict();
         pager.setMax(form.groupList.length + 1); // +1は未入力項目分
 
         pager.show(el);
-        pager.active(lsInitialNum);
-        form.initialView(lsInitialNum);
+        pager.active(window.sv.lsInitialNum);
+        form.initialView(window.sv.lsInitialNum);
 
-        if (lsInputData !== null) {
+        if (Object.keys(window.sv.lsInputJson).length > 0) {
             $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
         }
 
@@ -315,8 +289,8 @@ jQuery.noConflict();
 
     let restore = () => {
         let record = kintone.mobile.app.record.get();
-        for (let fieldCode of Object.keys(lsInputJson)) {
-            record.record[fieldCode].value = lsInputJson[fieldCode];
+        for (let fieldCode of Object.keys(window.sv.lsInputJson)) {
+            record.record[fieldCode].value = window.sv.lsInputJson[fieldCode];
             form.input(fieldCode, pager.getNoInputsNum());
         }
         kintone.events.off(changeEvent, change);
@@ -328,8 +302,8 @@ jQuery.noConflict();
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
 
-        lsInputJson[fieldCode] = value;
-        localStorage.setItem(lsInputKey, JSON.stringify(lsInputJson));
+        window.sv.lsInputJson[fieldCode] = value;
+        window.sv.saveLocalStorage(window.sv.lsInputKey, window.sv.lsInputJson);
 
         if (value !== '' && value !== undefined) {
             form.input(fieldCode);
@@ -341,7 +315,7 @@ jQuery.noConflict();
 
 
     let form = new Form();
-    let pager = new Pager(lsInitialNum);
+    let pager = new Pager(window.sv.lsInitialNum);
 
 
 
@@ -370,17 +344,6 @@ jQuery.noConflict();
     kintone.events.on(submitSuccessEventList, (event) => {
         localStorage.removeItem(lsInputKey);
         return event;
-    });
-
-    kintone.events.on(['mobile.app.record.index.show'], (event) => {
-        let records = event.records;
-
-        let recordIdList = [];
-        for (let i = 0; i < records.length; i++) {
-            recordIdList.unshift(Number(records[i].$id.value));
-        }
-
-        localStorage.setItem(lsListKey, JSON.stringify(recordIdList));
     });
 
 
