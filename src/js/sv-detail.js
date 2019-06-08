@@ -290,6 +290,17 @@ jQuery.noConflict();
     let restore = () => {
         let record = kintone.mobile.app.record.get();
         for (let fieldCode of Object.keys(window.sv.lsInputJson)) {
+            // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
+            if (pluginConfig.svTypeList[fieldCode].type === 'SUBTABLE') {
+                let table = window.sv.lsInputJson[fieldCode];
+                for (let i = 0; i < table.length; i++) {
+                    for (let key of Object.keys(table[i].value)) {
+                        if (table[i].value[key].value === undefined) {
+                            table[i].value[key].value = '';
+                        }
+                    }
+                }
+            }
             record.record[fieldCode].value = window.sv.lsInputJson[fieldCode];
             form.input(fieldCode, pager.getNoInputsNum());
         }

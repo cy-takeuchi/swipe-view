@@ -17,7 +17,10 @@ jQuery.noConflict();
         res = await window.sv.kintoneApp.getFormFields(window.sv.appId, 'DEFAULT', true);
         let fieldPropertyList = res.properties;
 
-        let itemList = [], groupList = [], num = 0;
+        // itemListは表（プラグイン設定画面の見た目）のデータ
+        // groupListは裏（詳細画面で利用する）のデータ
+        // typeListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
+        let itemList = [], groupList = [], typeList = {}, num = 0;
         groupList[0] = {};
         for (let i of Object.keys(formLayoutList)) {
             let type = formLayoutList[i].type;
@@ -43,6 +46,10 @@ jQuery.noConflict();
                 groupList[0][fieldCode] = {
                     //required: fieldRequired,
                     shown: false
+                };
+
+                typeList[fieldCode] = {
+                    type: type
                 };
 
                 num++;
@@ -72,12 +79,16 @@ jQuery.noConflict();
                         shown: false
                     };
 
+                    typeList[fieldCode] = {
+                        type: fieldType
+                    };
+
                     num++;
                 }
             }
         }
 
-        return [itemList, groupList];
+        return [itemList, groupList, typeList];
     }
 
     let createValueNames = (columnList) => {
@@ -142,8 +153,13 @@ jQuery.noConflict();
     $('div#sv-save').append(saveButton.render());
 
     getFormFields().then((array) => {
+        // itemListは表（プラグイン設定画面の見た目）のデータ
+        // groupListは裏（詳細画面で利用する）のデータ
+        // typeListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
         let itemList = array[0];
         let groupList = array[1];
+        let typeList = array[2];
+
         let originalGroupList = originalPluginConfig.svGroupList;
 
         let columnNum = 0, columnList = [];
@@ -309,6 +325,7 @@ jQuery.noConflict();
 
             let newPluginConfig = {};
             newPluginConfig.svGroupList = JSON.stringify(groupList);
+            newPluginConfig.svTypeList = JSON.stringify(typeList);
 
             // 未入力項目用の列を追加
             let noInputs = $.extend(true, {}, groupList[0]);
