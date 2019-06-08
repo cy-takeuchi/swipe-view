@@ -233,7 +233,23 @@ jQuery.noConflict();
         form.initialView(window.sv.lsInitialNum);
 
         if (Object.keys(window.sv.lsInputJson).length > 0) {
-            $(el).append('<div>反映しますか？</div><span id="ok" style="padding: 10px;">OK</span><span id="ng" style="padding: 10px;">NG</span>');
+            $.confirm({
+                title: false,
+                content: '入力途中のデータがあります。<br />リストアしますか？',
+                backgroundDismiss: true,
+                useBootstrap: false,
+                buttons: {
+                    cancel: {
+                        text: 'キャンセル',
+                        btnClass: 'btn-default'
+                    },
+                    confirm: {
+                        text: 'リストア',
+                        btnClass: 'btn-blue',
+                        action: () => {restore()}
+                    }
+                }
+            });
         }
 
         let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
