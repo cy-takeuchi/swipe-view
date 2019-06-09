@@ -18,14 +18,43 @@ li.sv-pager-active a {
 }
 
 div#sv-swipe {
-    width: 100%;
-    padding: 5px;
-    line-height: 3;
-    text-align: center;
     z-index: 999;
     position: fixed;
-    bottom: 70px;
+    bottom: 65px;
     transform: translate3d(0, 0, 0);
     background-color: gold;
     opacity: 0.6;
+    border-radius: 10px;
+}
+
+@media screen and (max-width: 479px) {
+    div#sv-swipe {
+        left: 170vw;
+        width: 15vw;
+        height: 5vh;
+    }
+}
+
+@media screen and (min-width:480px) and (max-width:599px) {
+    div#sv-swipe {
+        left: 175vw;
+        width: 12vw;
+        height: 7vh;
+    }
+}
+
+@media screen and (min-width:600px) and (max-width:959px) {
+    div#sv-swipe {
+        left: 185vw;
+        width: 9vw;
+        height: 8vh;
+    }
+}
+
+@media screen and (min-width:960px) {
+    div#sv-swipe {
+        left: 188vw;
+        width: 6vw;
+        height: 8vh;
+    }
 }

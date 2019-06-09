@@ -150,7 +150,7 @@ jQuery.noConflict();
         pager.active(window.sv.lsInitialNum);
         form.initialView(window.sv.lsInitialNum);
 
-        let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
+        let html = `<div id="${swipeSpaceId}"></div>`;
         $(el).append(html);
 
         let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
@@ -252,7 +252,7 @@ jQuery.noConflict();
             });
         }
 
-        let html = `<div id="${swipeSpaceId}">ここをスワイプぅ</div>`;
+        let html = `<div id="${swipeSpaceId}"></div>`;
         $(el).append(html);
 
         let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
