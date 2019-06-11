@@ -433,7 +433,7 @@ jQuery.noConflict();
         'mobile.app.record.edit.submit.success'
     ];
     kintone.events.on(submitSuccessEventList, (event) => {
-        localStorage.removeItem(lsInputKey);
+        localStorage.removeItem(window.sv.lsInputKey);
         return event;
     });
 
