@@ -178,7 +178,11 @@ jQuery.noConflict();
             for (let j = 0; j < itemList.length; j++) {
                 let fieldCode = itemList[j].code;
                 for (let k = 0; k < originalGroupList.length; k++) {
-                    if (originalGroupList[k][fieldCode].shown === true) {
+                    // プラグイン設定後にフィールドを追加した場合
+                    if (originalGroupList[k][fieldCode] === undefined) {
+                        originalGroupList[k][fieldCode] = {shown: false};
+                        itemList[j][`column${k}`] = '×';
+                    } else if (originalGroupList[k][fieldCode].shown === true) {
                         itemList[j][`column${k}`] = '〇';
                     } else if (originalGroupList[k][fieldCode].shown === false) {
                         itemList[j][`column${k}`] = '×';
