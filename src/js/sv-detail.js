@@ -335,6 +335,11 @@ jQuery.noConflict();
         pager.setMax(form.groupList.length);
 
         pager.show(el);
+
+        // プラグインの設定変更で項目数が減った場合
+        if (window.sv.lsInitialNum >= form.groupList.length) {
+            window.sv.lsInitialNum = 0;
+        }
         pager.active(window.sv.lsInitialNum);
         form.initialView(window.sv.lsInitialNum);
 
@@ -366,6 +371,11 @@ jQuery.noConflict();
         pager.setMax(form.groupList.length + 1); // +1は未入力項目分
 
         pager.show(el);
+
+        // プラグインの設定変更で項目数が減った場合
+        if (window.sv.lsInitialNum >= form.groupList.length) {
+            window.sv.lsInitialNum = 0;
+        }
         pager.active(window.sv.lsInitialNum);
         form.initialView(window.sv.lsInitialNum);
 
