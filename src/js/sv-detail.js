@@ -40,7 +40,6 @@ jQuery.noConflict();
         }
 
         initialView(num) {
-            console.log(num, this.groupList[num]);
             for (let fieldCode of Object.keys(this.groupList[num])) {
                 kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[num][fieldCode].shown);
             }
@@ -269,6 +268,64 @@ jQuery.noConflict();
         $(el).append(html);
     }
 
+    let restore = () => {
+        let record = kintone.mobile.app.record.get();
+        for (let fieldCode of Object.keys(window.sv.lsInputJson)) {
+            // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
+            if (pluginConfig.svTypeList[fieldCode].type === 'SUBTABLE') {
+                let table = window.sv.lsInputJson[fieldCode];
+                for (let i = 0; i < table.length; i++) {
+                    for (let key of Object.keys(table[i].value)) {
+                        if (table[i].value[key].value === undefined) {
+                            table[i].value[key].value = '';
+                        }
+                    }
+                }
+            }
+            record.record[fieldCode].value = window.sv.lsInputJson[fieldCode];
+            form.input(fieldCode, pager.getNoInputsNum());
+        }
+        kintone.events.off(changeEvent, change);
+        kintone.mobile.app.record.set(record);
+        kintone.events.on(changeEvent, change);
+    }
+
+    let confirmRestore = () => {
+        $.confirm({
+            title: false,
+            content: '入力途中のデータがあります。<br />リストアしますか？',
+            backgroundDismiss: true,
+            useBootstrap: false,
+            buttons: {
+                cancel: {
+                    text: 'キャンセル',
+                    btnClass: 'btn-default'
+                },
+                confirm: {
+                    text: 'リストア',
+                    btnClass: 'btn-blue',
+                    action: () => {restore()}
+                }
+            }
+        });
+    }
+
+    let change = (event) => {
+        let value = event.changes.field.value;
+        let fieldCode = event.type.replace(/.*\./, '');
+
+        window.sv.lsInputJson[fieldCode] = value;
+        window.sv.saveLocalStorage(window.sv.lsInputKey, window.sv.lsInputJson);
+
+        if (value !== '' && value !== undefined) {
+            form.input(fieldCode);
+        } else {
+            form.empty(fieldCode);
+        }
+    }
+
+
+
     let showSwipeViewForRead = (event) => {
         let el = kintone.mobile.app.getHeaderSpaceElement();
 
@@ -313,23 +370,7 @@ jQuery.noConflict();
         form.initialView(window.sv.lsInitialNum);
 
         if (Object.keys(window.sv.lsInputJson).length > 0) {
-            $.confirm({
-                title: false,
-                content: '入力途中のデータがあります。<br />リストアしますか？',
-                backgroundDismiss: true,
-                useBootstrap: false,
-                buttons: {
-                    cancel: {
-                        text: 'キャンセル',
-                        btnClass: 'btn-default'
-                    },
-                    confirm: {
-                        text: 'リストア',
-                        btnClass: 'btn-blue',
-                        action: () => {restore()}
-                    }
-                }
-            });
+            confirmRestore();
         }
 
         showSwipeArea(el);
@@ -350,42 +391,6 @@ jQuery.noConflict();
         $(document).on('click touchstart', 'span#ok', restore);
 
         return event;
-    }
-
-    let restore = () => {
-        let record = kintone.mobile.app.record.get();
-        for (let fieldCode of Object.keys(window.sv.lsInputJson)) {
-            // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
-            if (pluginConfig.svTypeList[fieldCode].type === 'SUBTABLE') {
-                let table = window.sv.lsInputJson[fieldCode];
-                for (let i = 0; i < table.length; i++) {
-                    for (let key of Object.keys(table[i].value)) {
-                        if (table[i].value[key].value === undefined) {
-                            table[i].value[key].value = '';
-                        }
-                    }
-                }
-            }
-            record.record[fieldCode].value = window.sv.lsInputJson[fieldCode];
-            form.input(fieldCode, pager.getNoInputsNum());
-        }
-        kintone.events.off(changeEvent, change);
-        kintone.mobile.app.record.set(record);
-        kintone.events.on(changeEvent, change);
-    }
-
-    let change = (event) => {
-        let value = event.changes.field.value;
-        let fieldCode = event.type.replace(/.*\./, '');
-
-        window.sv.lsInputJson[fieldCode] = value;
-        window.sv.saveLocalStorage(window.sv.lsInputKey, window.sv.lsInputJson);
-
-        if (value !== '' && value !== undefined) {
-            form.input(fieldCode);
-        } else {
-            form.empty(fieldCode);
-        }
     }
 
 
