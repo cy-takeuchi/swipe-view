@@ -36,9 +36,9 @@
     "js": [
       "js/jquery-3.4.1.min.js",
       "js/kintone-js-sdk-0.3.0.min.js",
-      "js/hammer-2.0.8.min.js",
       "js/list-1.5.0.min.js",
       "js/jquery-confirm-3.3.4.min.js",
+      "js/interact-1.4.9.min.js",
       "js/sv-common.js",
       "js/sv-detail.js",
       "js/sv-list.js"

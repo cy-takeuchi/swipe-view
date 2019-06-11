@@ -13,7 +13,7 @@ jQuery.noConflict();
         return;
     }
 
-    const swipeSpaceId = 'sv-swipe';
+    const swipeElement = 'sv-swipe-element';
     const pagerId = 'sv-pager';
 
     class Form {
@@ -40,6 +40,7 @@ jQuery.noConflict();
         }
 
         initialView(num) {
+            console.log(num, this.groupList[num]);
             for (let fieldCode of Object.keys(this.groupList[num])) {
                 kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[num][fieldCode].shown);
             }
@@ -138,6 +139,136 @@ jQuery.noConflict();
         }
     }
 
+
+
+    let nextColumn = () => {
+        console.log('swipe right');
+        let before = pager.getCurrentPage();
+        let current = before + 1;
+        if (current >= pager.getMax()) {
+            return;
+        }
+
+        form.change(current, before);
+
+        pager.passive(before);
+        pager.active(current);
+
+        pager.setCurrentPage(current);
+    }
+
+    let prevColumn = () => {
+        console.log('swipe left');
+        let before = pager.getCurrentPage();
+        let current = before - 1;
+        if (current < 0) {
+            return;
+        }
+
+        form.change(current, before);
+
+        pager.passive(before);
+        pager.active(current);
+
+        pager.setCurrentPage(current);
+    }
+
+    let nextRecord = () => {
+        console.log('swipe up');
+        let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+        let recordId = Number(match[2]);
+        let index = window.sv.lsListJson.indexOf(recordId);
+        let nextRecordId = window.sv.lsListJson[index + 1];
+        if (nextRecordId !== undefined) {
+            // 選択している項目を次レコードの初期値として利用する
+            window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
+            let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+            location.href = newUrl;
+        }
+    }
+
+    let prevRecord = () => {
+        console.log('swipe down');
+        let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+        let recordId = Number(match[2]);
+        let index = window.sv.lsListJson.indexOf(recordId);
+        let nextRecordId = window.sv.lsListJson[index - 1];
+        if (nextRecordId !== undefined) {
+            // 選択している項目を次レコードの初期値として利用する
+            window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
+            let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+            location.href = newUrl;
+        }
+    }
+
+    let getDirection = (x, y) => {
+        let direction = '';
+
+        if (Math.abs(x) > Math.abs(y) || pager.getShowMode() === false) {
+            if (x >= 0) {
+                direction = 'right';
+            } else if (x < 0) {
+                direction = 'left';
+            }
+        } else if (Math.abs(x) < Math.abs(y)) {
+            if (y >= 0) {
+                direction = 'bottom';
+            } else if (y < 0) {
+                direction = 'top';
+            }
+        }
+
+        return direction;
+    }
+
+    let dragMoveListener = (event) => {
+        let target = event.target;
+        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        let text = getDirection(x, y);
+        target.setAttribute('data-value', text);
+
+        target.style.webkitTransform = `translate(${x}px, ${y}px)`;
+        target.style.transform = `translate(${x}px, ${y}px)`;
+
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
+    }
+
+    let dragEndListener = (event) => {
+        let target = event.target;
+        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        let text = getDirection(x, y);
+        if (text === 'right') {
+            nextColumn();
+        } else if (text === 'left') {
+            prevColumn();
+        } else if (text === 'top') {
+            nextRecord();
+        } else if (text === 'bottom') {
+            prevRecord();
+        }
+
+        target.setAttribute('data-value', '');
+
+        target.style.webkitTransform = 'translate(0px, 0px)';
+        target.style.transform = 'translate(0px, 0px)';
+
+        target.setAttribute('data-x', 0);
+        target.setAttribute('data-y', 0);
+    }
+
+    let showSwipeArea = (el) => {
+        let html = '';
+        html += '<div id="sv-swipe-area">';
+        html += `<div id="${swipeElement}"></div>`;
+        html += '</div>';
+        $(el).append(html);
+    }
+
     let showSwipeViewForRead = (event) => {
         let el = kintone.mobile.app.getHeaderSpaceElement();
 
@@ -150,70 +281,19 @@ jQuery.noConflict();
         pager.active(window.sv.lsInitialNum);
         form.initialView(window.sv.lsInitialNum);
 
-        let html = `<div id="${swipeSpaceId}"></div>`;
-        $(el).append(html);
+        showSwipeArea(el);
 
-        let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
-        mc.get('swipe').set({direction: Hammer.DIRECTION_ALL});
-
-        mc.on('swiperight', () => {
-            console.log('swipe right');
-            let before = pager.getCurrentPage();
-            let current = before + 1;
-            if (current >= pager.getMax()) {
-                return;
-            }
-
-            form.change(current, before);
-
-            pager.passive(before);
-            pager.active(current);
-
-            pager.setCurrentPage(current);
-        });
-
-        mc.on('swipeleft', () => {
-            console.log('swipe left');
-            let before = pager.getCurrentPage();
-            let current = before - 1;
-            if (current < 0) {
-                return;
-            }
-
-            form.change(current, before);
-
-            pager.passive(before);
-            pager.active(current);
-
-            pager.setCurrentPage(current);
-        });
-
-        mc.on('swipeup', () => {
-            console.log('swipe up');
-            let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-            let recordId = Number(match[2]);
-            let index = window.sv.lsListJson.indexOf(recordId);
-            let nextRecordId = window.sv.lsListJson[index + 1];
-            if (nextRecordId !== undefined) {
-                // 選択している項目を次レコードの初期値として利用する
-                window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
-                let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
-                location.href = newUrl;
-            }
-        });
-
-        mc.on('swipedown', () => {
-            console.log('swipe down');
-            let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-            let recordId = Number(match[2]);
-            let index = window.sv.lsListJson.indexOf(recordId);
-            let nextRecordId = window.sv.lsListJson[index - 1];
-            if (nextRecordId !== undefined) {
-                // 選択している項目を次レコードの初期値として利用する
-                window.sv.saveLocalStorage(window.sv.lsInitialKey, pager.getCurrentPage());
-                let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
-                location.href = newUrl;
-            }
+        interact(`#${swipeElement}`).draggable({
+            inertia: true,
+            modifiers: [
+                interact.modifiers.restrict({
+                    restriction: 'parent',
+                    endOnly: false,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                }),
+            ],
+            onmove: dragMoveListener,
+            onend: dragEndListener
         });
 
         return event;
@@ -252,50 +332,19 @@ jQuery.noConflict();
             });
         }
 
-        let html = `<div id="${swipeSpaceId}"></div>`;
-        $(el).append(html);
+        showSwipeArea(el);
 
-        let mc = new Hammer(document.getElementById(swipeSpaceId), {domEvents: true});
-        mc.get('swipe').set({direction: Hammer.DIRECTION_HORIZONTAL});
-
-        mc.on('swiperight', () => {
-            console.log('swipe right');
-            let before = pager.getCurrentPage();
-            let current = before + 1;
-            if (current >= pager.getMax()) {
-                return;
-            }
-
-            if (pager.isNoInputsPage(current) === true) {
-                form.noInputsView(current);
-            } else {
-                form.change(current, before);
-            }
-
-            pager.passive(before);
-            pager.active(current);
-
-            pager.setCurrentPage(current);
-        });
-
-        mc.on('swipeleft', () => {
-            console.log('swipe left');
-            let before = pager.getCurrentPage();
-            let current = before - 1;
-            if (current < 0) {
-                return;
-            }
-
-            if (pager.isNoInputsPage(current) === true) {
-                form.noInputsView(current);
-            } else {
-                form.change(current, before);
-            }
-
-            pager.passive(before);
-            pager.active(current);
-
-            pager.setCurrentPage(current);
+        interact(`#${swipeElement}`).draggable({
+            inertia: true,
+            modifiers: [
+                interact.modifiers.restrict({
+                    restriction: 'parent',
+                    endOnly: false,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                }),
+            ],
+            onmove: dragMoveListener,
+            onend: dragEndListener
         });
 
         $(document).on('click touchstart', 'span#ok', restore);
