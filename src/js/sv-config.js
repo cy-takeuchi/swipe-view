@@ -335,7 +335,19 @@ jQuery.noConflict();
             let noInputs = $.extend(true, {}, groupList[0]);
             for (let fieldCode of Object.keys(noInputs)) {
                 delete noInputs[fieldCode].shown;
-                noInputs[fieldCode].empty = true;
+                let fieldType = typeList[fieldCode].type;
+                let noInputsFieldTypeList = [
+                    'RECORD_NUMBER',
+                    'CREATED_TIME',
+                    'CREATOR',
+                    'UPDATED_TIME',
+                    'MODIFIER'
+                ];
+                if (noInputsFieldTypeList.includes(fieldType)) {
+                    noInputs[fieldCode].empty = false;
+                } else {
+                    noInputs[fieldCode].empty = true;
+                }
             }
             newPluginConfig.svNoInputs = JSON.stringify(noInputs);
 
