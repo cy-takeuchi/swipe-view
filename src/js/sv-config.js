@@ -179,17 +179,23 @@ jQuery.noConflict();
             }
             columnNum = i - 1;
 
-            for (let j = 0; j < itemList.length; j++) {
-                let fieldCode = itemList[j].code;
-                for (let k = 0; k < originalGroupList.length; k++) {
-                    // プラグイン設定後にフィールドを追加した場合
-                    if (originalGroupList[k][fieldCode] === undefined) {
-                        originalGroupList[k][fieldCode] = {shown: false};
-                        itemList[j][`column${k}`] = '×';
-                    } else if (originalGroupList[k][fieldCode].shown === true) {
-                        itemList[j][`column${k}`] = '〇';
-                    } else if (originalGroupList[k][fieldCode].shown === false) {
-                        itemList[j][`column${k}`] = '×';
+            // プラグイン設定時と現在のフィールドコードのリストを作成
+            let fieldCodeList = $.merge(Object.keys(groupList[0]), Object.keys(originalGroupList[0]));
+            let fieldCodeUniqueList = fieldCodeList.filter((ele, i) => fieldCodeList.indexOf(ele) === i);
+
+            for (let j = 0; j < originalGroupList.length; j++) {
+                for (let fieldCode of fieldCodeUniqueList) {
+                    let item = itemList.find(item => item.code === fieldCode);
+
+                    if (item === undefined) { // プラグイン設定後にフィールドを削除した場合
+                        delete originalGroupList[j][fieldCode];
+                    } else if (originalGroupList[j][fieldCode] === undefined) { // プラグイン設定後にフィールドを追加した場合
+                        originalGroupList[j][fieldCode] = {shown: false};
+                        item[`column${j}`] = '×';
+                    } else if (originalGroupList[j][fieldCode].shown === true) {
+                        item[`column${j}`] = '〇';
+                    } else if (originalGroupList[j][fieldCode].shown === false) {
+                        item[`column${j}`] = '×';
                     }
                 }
             }
