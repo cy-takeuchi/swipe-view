@@ -9,12 +9,13 @@ ul#sv-pager li {
     padding: 8px 16px;
 }
 
-li.sv-pager-active {
-    background-color: gold
+ul#sv-pager li.sv-pager-active {
+    background-color: gold;
 }
-li.sv-pager-active a {
+
+ul#sv-pager li.sv-pager-active a {
     color: royalblue;
-    font-weight: bold
+    font-weight: bold;
 }
 
 div#sv-swipe-element:after {
