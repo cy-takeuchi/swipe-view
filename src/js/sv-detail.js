@@ -20,21 +20,32 @@ jQuery.noConflict();
         constructor() {
             this.groupList = [];
             this.noInputs = {};
+            this.requiredInputs = {};
             this.showMode = false;
         }
 
         change(current, before) {
-            if (pager.isNoInputsPage(before) === true) {
-                for (let fieldCode of Object.keys(this.groupList[current])) {
-                    if (this.groupList[current][fieldCode].shown !== this.noInputs[fieldCode].empty) {
-                        kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[current][fieldCode].shown);
-                    }
-                }
+            let currentData = [];
+            if (pager.isRequiredInputsPage(current) === true) {
+                currentData = this.requiredInputs;
+            } else if (pager.isNoInputsPage(current) === true) {
+                currentData = this.noInputs;
             } else {
-                for (let fieldCode of Object.keys(this.groupList[current])) {
-                    if (this.groupList[current][fieldCode].shown !== this.groupList[before][fieldCode].shown) {
-                        kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[current][fieldCode].shown);
-                    }
+                currentData = this.groupList[current];
+            }
+
+            let beforeData = [];
+            if (pager.isRequiredInputsPage(before) === true) {
+                beforeData = this.requiredInputs;
+            } else if (pager.isNoInputsPage(before) === true) {
+                beforeData = this.noInputs;
+            } else {
+                beforeData = this.groupList[before];
+            }
+
+            for (let fieldCode of Object.keys(currentData)) {
+                if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
                 }
             }
         }
@@ -45,19 +56,12 @@ jQuery.noConflict();
             }
         }
 
-        // 未入力項目用
-        noInputsView() {
-            for (let fieldCode of Object.keys(this.noInputs)) {
-                kintone.mobile.app.record.setFieldShown(fieldCode, this.noInputs[fieldCode].empty);
-            }
-        }
-
         input(fieldCode) {
-            this.noInputs[fieldCode].empty = false;
+            this.noInputs[fieldCode].shown = false;
         }
 
         empty(fieldCode) {
-            this.noInputs[fieldCode].empty = true;
+            this.noInputs[fieldCode].shown = true;
         }
     }
 
@@ -87,8 +91,16 @@ jQuery.noConflict();
             return this.max;
         }
 
-        getNoInputsNum() {
+        getRequiredInputsNum() {
             return (this.getShowMode() === true) ? null : this.max - 1;
+        }
+
+        isRequiredInputsPage(num) {
+            return (num === this.getRequiredInputsNum()) ? true : false;
+        }
+
+        getNoInputsNum() {
+            return (this.getShowMode() === true) ? null : this.max - 2;
         }
 
         isNoInputsPage(num) {
@@ -110,7 +122,7 @@ jQuery.noConflict();
         show(el) {
             let max = this.getMax();
             if (this.getShowMode() === false) {
-                max = this.getMax() - 1;
+                max = this.getMax() - 2;
             }
 
             let html = '';
@@ -121,7 +133,8 @@ jQuery.noConflict();
             }
 
             if (this.getShowMode() === false) {
-                html += `<li><a href="javascript:void(0)">未入力項目</a></li>`;
+                html += `<li><a href="javascript:void(0)">未入力</a></li>`;
+                html += `<li><a href="javascript:void(0)">必須入力</a></li>`;
             }
             html += '</ul>';
             html += '</div>';
@@ -272,7 +285,7 @@ jQuery.noConflict();
         let record = kintone.mobile.app.record.get();
         for (let fieldCode of Object.keys(window.sv.lsInputJson)) {
             // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
-            if (pluginConfig.svTypeList[fieldCode].type === 'SUBTABLE') {
+            if (pluginConfig.svOptionList[fieldCode].type === 'SUBTABLE') {
                 let table = window.sv.lsInputJson[fieldCode];
                 for (let i = 0; i < table.length; i++) {
                     for (let key of Object.keys(table[i].value)) {
@@ -320,7 +333,7 @@ jQuery.noConflict();
         if (value !== '' && value !== undefined) {
             form.input(fieldCode);
         } else {
-            form.empty(fieldCode);
+            form.shown(fieldCode);
         }
     }
 
@@ -368,7 +381,8 @@ jQuery.noConflict();
 
         form.groupList = pluginConfig.svGroupList;
         form.noInputs = pluginConfig.svNoInputs;
-        pager.setMax(form.groupList.length + 1); // +1は未入力項目分
+        form.requiredInputs = pluginConfig.svRequiredInputs;
+        pager.setMax(form.groupList.length + 2); // +2は必須入力、未入力項目分
 
         pager.show(el);
 
@@ -443,11 +457,7 @@ jQuery.noConflict();
         let before = pager.getCurrentPage();
         let current = $(event.currentTarget).index();
 
-        if (pager.isNoInputsPage(current) === true) {
-            form.noInputsView(current);
-        } else {
-            form.change(current, before);
-        }
+        form.change(current, before);
 
         pager.passive(before);
         pager.active(current);

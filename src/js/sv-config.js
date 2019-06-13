@@ -19,8 +19,8 @@ jQuery.noConflict();
 
         // itemListは表（プラグイン設定画面の見た目）のデータ
         // groupListは裏（詳細画面で利用する）のデータ
-        // typeListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
-        let itemList = [], groupList = [], typeList = {}, num = 0;
+        // optionListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
+        let itemList = [], groupList = [], optionList = {}, num = 0;
         groupList[0] = {};
         for (let i of Object.keys(formLayoutList)) {
             let type = formLayoutList[i].type;
@@ -33,23 +33,25 @@ jQuery.noConflict();
                     fieldLabel = 'サブテーブル';
                 }
                 let fieldRequired = fieldPropertyList[fieldCode].required;
+                if (fieldRequired === undefined) {
+                    fieldRequired = false;
+                }
 
                 itemList.push({
                     num: num,
                     label: fieldLabel,
                     code: fieldCode,
                     type: type,
-                    //required: fieldRequired,
                     column0: '×'
                 });
 
                 groupList[0][fieldCode] = {
-                    //required: fieldRequired,
                     shown: false
                 };
 
-                typeList[fieldCode] = {
-                    type: type
+                optionList[fieldCode] = {
+                    type: type,
+                    required: fieldRequired
                 };
 
                 num++;
@@ -64,23 +66,25 @@ jQuery.noConflict();
                     let fieldCode = fieldList[j].code;
                     let fieldLabel = fieldPropertyList[fieldCode].label;
                     let fieldRequired = fieldPropertyList[fieldCode].required;
+                    if (fieldRequired === undefined) {
+                        fieldRequired = false;
+                    }
 
                     itemList.push({
                         num: num,
                         label: fieldLabel,
                         code: fieldCode,
                         type: fieldType,
-                        //required: fieldRequired,
                         column0: '×'
                     });
 
                     groupList[0][fieldCode] = {
-                        //required: fieldRequired,
                         shown: false
                     };
 
-                    typeList[fieldCode] = {
-                        type: fieldType
+                    optionList[fieldCode] = {
+                        type: fieldType,
+                        required: fieldRequired
                     };
 
                     num++;
@@ -88,7 +92,7 @@ jQuery.noConflict();
             }
         }
 
-        return [itemList, groupList, typeList];
+        return [itemList, groupList, optionList];
     }
 
     let createValueNames = (columnList) => {
@@ -155,10 +159,10 @@ jQuery.noConflict();
     getFormFields().then((array) => {
         // itemListは表（プラグイン設定画面の見た目）のデータ
         // groupListは裏（詳細画面で利用する）のデータ
-        // typeListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
+        // optionListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
         let itemList = array[0];
         let groupList = array[1];
-        let typeList = array[2];
+        let optionList = array[2];
 
         let originalGroupList = originalPluginConfig.svGroupList;
 
@@ -329,27 +333,34 @@ jQuery.noConflict();
 
             let newPluginConfig = {};
             newPluginConfig.svGroupList = JSON.stringify(groupList);
-            newPluginConfig.svTypeList = JSON.stringify(typeList);
+            newPluginConfig.svOptionList = JSON.stringify(optionList);
 
             // 未入力項目用の列を追加
             let noInputs = $.extend(true, {}, groupList[0]);
             for (let fieldCode of Object.keys(noInputs)) {
-                delete noInputs[fieldCode].shown;
-                let fieldType = typeList[fieldCode].type;
-                let noInputsFieldTypeList = [
+                let fieldType = optionList[fieldCode].type;
+                let noInputsFieldoptionList = [
                     'RECORD_NUMBER',
                     'CREATED_TIME',
                     'CREATOR',
                     'UPDATED_TIME',
                     'MODIFIER'
                 ];
-                if (noInputsFieldTypeList.includes(fieldType)) {
-                    noInputs[fieldCode].empty = false;
+                if (noInputsFieldoptionList.includes(fieldType)) {
+                    noInputs[fieldCode].shown = false;
                 } else {
-                    noInputs[fieldCode].empty = true;
+                    noInputs[fieldCode].shown = true;
                 }
             }
             newPluginConfig.svNoInputs = JSON.stringify(noInputs);
+
+            // 必須入力項目用の列を追加
+            let requiredInputs = $.extend(true, {}, groupList[0]);
+            for (let fieldCode of Object.keys(requiredInputs)) {
+                let fieldRequired = optionList[fieldCode].required;
+                requiredInputs[fieldCode].shown = fieldRequired;
+            }
+            newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
 
             let changeEventList = [];
             for (let fieldCode of Object.keys(groupList[0])) {
