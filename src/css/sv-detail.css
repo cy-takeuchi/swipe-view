@@ -26,6 +26,7 @@ div#sv-swipe-element:after {
     margin-left: 1.0em;
 }
 div#sv-swipe-area {
+    pointer-events: none;
     z-index: 999;
     position: fixed;
     bottom: 65px;
@@ -37,6 +38,8 @@ div#sv-swipe-area {
 }
 
 div#sv-swipe-element {
+    pointer-events: auto;
+    z-index: 1000;
     background-color: green;
     border-radius: 10px;
     padding: 20px;
