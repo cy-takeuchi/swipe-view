@@ -1,6 +1,8 @@
 jQuery.noConflict();
-(($, PLUGIN_ID) => {
+(($) => {
     'use strict';
+
+    const originalPluginConfig = window.sv.pluginConfig;
 
     let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + window.sv.appId;
@@ -137,17 +139,6 @@ jQuery.noConflict();
         html += '</th>';
 
         return html;
-    }
-
-    let originalPluginConfig = {};
-    try {
-        originalPluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
-        for (let key of Object.keys(originalPluginConfig)) {
-            originalPluginConfig[key] = JSON.parse(originalPluginConfig[key]);
-        }
-    } catch (e) {
-        console.log(`[ERROR]: ${e}`);
-        return;
     }
 
     let saveButton = new kintoneUIComponent.Button({
@@ -382,4 +373,4 @@ jQuery.noConflict();
             });
         });
     });
-})(jQuery, kintone.$PLUGIN_ID);
+})(jQuery);

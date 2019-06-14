@@ -1,5 +1,16 @@
-(() => {
+((PLUGIN_ID) => {
     'use strict';
+
+    let pluginConfig = {};
+    try {
+        pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
+        for (let key of Object.keys(pluginConfig)) {
+            pluginConfig[key] = JSON.parse(pluginConfig[key]);
+        }
+    } catch (e) {
+        console.log(`[ERROR]: ${e}`);
+        return;
+    }
 
     const getAppId = () => {
         let id = kintone.mobile.app.getId();
@@ -37,6 +48,7 @@
 
     window.sv = window.sv || {};
 
+    window.sv.pluginConfig = pluginConfig;
     window.sv.kintoneApp = kintoneApp;
     window.sv.kintoneRecord = kintoneRecord;
     window.sv.appId = appId;
@@ -46,4 +58,4 @@
     window.sv.lsInputKey = lsInputKey;
     window.sv.lsListKey = lsListKey;
     window.sv.lsInitialKey = lsInitialKey;
-})();
+})(kintone.$PLUGIN_ID);

@@ -1,6 +1,8 @@
 jQuery.noConflict();
-(($, PLUGIN_ID) => {
+(($) => {
     'use strict';
+
+    const pluginConfig = window.sv.pluginConfig;
 
     let getRecords = async (query) => {
         let res = await window.sv.kintoneRecord.getRecords(window.sv.appId, query);
@@ -57,11 +59,10 @@ jQuery.noConflict();
 
         window.sv.saveLocalStorage(window.sv.lsListKey, recordIdList);
 
-
-
         if (event.viewId !== 5698734) {
             return event;
         }
+
 
 
         getRecords('').then((res) => {
@@ -87,4 +88,4 @@ jQuery.noConflict();
         });
     });
 
-})(jQuery, kintone.$PLUGIN_ID);
+})(jQuery);

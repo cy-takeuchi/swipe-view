@@ -1,22 +1,11 @@
 jQuery.noConflict();
-(($, PLUGIN_ID) => {
+(($) => {
     'use strict';
 
     const swipeElement = 'sv-swipe-element';
     const pagerId = 'sv-pager';
 
-    let pluginConfig = {};
-    try {
-        pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
-        for (let key of Object.keys(pluginConfig)) {
-            pluginConfig[key] = JSON.parse(pluginConfig[key]);
-        }
-    } catch (e) {
-        console.log(`[ERROR]: ${e}`);
-        return;
-    }
-
-
+    const pluginConfig = window.sv.pluginConfig;
 
     class Form {
         constructor() {
@@ -481,4 +470,4 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
     });
 
-})(jQuery, kintone.$PLUGIN_ID);
+})(jQuery);
