@@ -35,21 +35,15 @@
     const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
     const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
 
-    const lsInputJson = pickLocalStorage(lsInputKey);
-    const lsListJson = pickLocalStorage(lsListKey);
-    const lsInitialNum = pickLocalStorage(lsInitialKey);
-
     window.sv = window.sv || {};
 
     window.sv.kintoneApp = kintoneApp;
     window.sv.kintoneRecord = kintoneRecord;
     window.sv.appId = appId;
 
+    window.sv.pickLocalStorage = pickLocalStorage;
     window.sv.saveLocalStorage = saveLocalStorage;
     window.sv.lsInputKey = lsInputKey;
-    window.sv.lsInputJson = lsInputJson;
     window.sv.lsListKey = lsListKey;
-    window.sv.lsListJson = lsListJson;
     window.sv.lsInitialKey = lsInitialKey;
-    window.sv.lsInitialNum = lsInitialNum;
 })();
