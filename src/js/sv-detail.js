@@ -253,6 +253,12 @@ jQuery.noConflict();
         let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
         let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
+        // デバッグ用
+        //$(`ul#${pagerId}`).parent().append(`<br />${x}:${y}`);
+        if (x ===0 && y ===0) {
+            return;
+        }
+
         let text = getDirection(x, y);
         if (text === 'right') {
             nextColumn();
