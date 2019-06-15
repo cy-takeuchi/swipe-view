@@ -25,25 +25,47 @@ jQuery.noConflict();
         let itemList = [], groupList = [], optionList = {}, num = 0;
         groupList[0] = {};
         for (let i of Object.keys(formLayoutList)) {
-            let type = formLayoutList[i].type;
-            if (type === 'GROUP' || type === 'SUBTABLE') {
+            let formLayout = formLayoutList[i];
+            let rowType = formLayout.type;
+            if (rowType === 'GROUP' || rowType === 'SUBTABLE') {
                 // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
                 // サブテーブルはサブテーブル配下の必須入力状態でrequiredを設定したい
-                let fieldCode = formLayoutList[i].code;
-                let fieldLabel = fieldPropertyList[fieldCode].label;
-                if (type === 'SUBTABLE' && fieldLabel === undefined) {
+                let fieldCode = formLayout.code;
+                let fieldProperty = fieldPropertyList[fieldCode];
+
+                let fieldLabel = '';
+                let fieldRequired = false;
+                if (rowType === 'GROUP') {
+                    fieldLabel = fieldProperty.label;
+
+                    // グループ内フィールドに必須フィールドがあればグループを必須とする
+                    let fieldListTwoDim = formLayout.layout.map((row) => row.fields.map(field => field.code));
+                    let underFieldList = [].concat(...fieldListTwoDim).map(fieldCode => fieldPropertyList[fieldCode]);
+                    for (let underField of underFieldList) {
+                        if (underField.required === true) {
+                            fieldRequired = true;
+                            break;
+                        }
+                    }
+                } else if (rowType === 'SUBTABLE') {
+                    // サブテーブルはラベルがないのでサブテーブルとする
                     fieldLabel = 'サブテーブル';
-                }
-                let fieldRequired = fieldPropertyList[fieldCode].required;
-                if (fieldRequired === undefined) {
-                    fieldRequired = false;
+
+                    // サブテーブル内フィールドに必須フィールドがあればサブテーブルを必須とする
+                    let underFieldList = fieldProperty.fields;
+                    for (let underFieldCode of Object.keys(underFieldList)) {
+                        if (underFieldList[underFieldCode].required === true) {
+                            fieldRequired = true;
+                            break;
+                        }
+                    }
                 }
 
                 itemList.push({
                     num: num,
                     label: fieldLabel,
                     code: fieldCode,
-                    type: type,
+                    type: rowType,
                     column0: '×'
                 });
 
@@ -52,13 +74,13 @@ jQuery.noConflict();
                 };
 
                 optionList[fieldCode] = {
-                    type: type,
+                    type: rowType,
                     required: fieldRequired
                 };
 
                 num++;
-            } else if (type === 'ROW') {
-                let fieldList = formLayoutList[i].fields;
+            } else if (rowType === 'ROW') {
+                let fieldList = formLayout.fields;
                 for (let j = 0; j < fieldList.length; j++) {
                     let fieldType = fieldList[j].type;
                     if (fieldType === 'HR' || fieldType === 'SPACER') {
@@ -66,8 +88,9 @@ jQuery.noConflict();
                     }
 
                     let fieldCode = fieldList[j].code;
-                    let fieldLabel = fieldPropertyList[fieldCode].label;
-                    let fieldRequired = fieldPropertyList[fieldCode].required;
+                    let fieldProperty = fieldPropertyList[fieldCode];
+                    let fieldLabel = fieldProperty.label;
+                    let fieldRequired = fieldProperty.required;
                     if (fieldRequired === undefined) {
                         fieldRequired = false;
                     }
