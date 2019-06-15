@@ -463,8 +463,9 @@ jQuery.noConflict();
 
         pager.passive(before);
         pager.active(current);
-
         pager.setCurrentPage(current);
+
+        window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
     });
 
 })(jQuery);
