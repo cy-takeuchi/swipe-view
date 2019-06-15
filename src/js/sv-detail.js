@@ -26,7 +26,9 @@ jQuery.noConflict();
             }
 
             let beforeData = [];
-            if (pager.isRequiredInputsPage(before) === true) {
+            if (before === null) { // 初期表示（前項目がない場合）
+                beforeData = null;
+            } else if (pager.isRequiredInputsPage(before) === true) {
                 beforeData = this.requiredInputs;
             } else if (pager.isNoInputsPage(before) === true) {
                 beforeData = this.noInputs;
@@ -35,15 +37,11 @@ jQuery.noConflict();
             }
 
             for (let fieldCode of Object.keys(currentData)) {
-                if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
+                if (beforeData === null) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
+                } else if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
                 }
-            }
-        }
-
-        initialView(num) {
-            for (let fieldCode of Object.keys(this.groupList[num])) {
-                kintone.mobile.app.record.setFieldShown(fieldCode, this.groupList[num][fieldCode].shown);
             }
         }
 
@@ -351,13 +349,13 @@ jQuery.noConflict();
 
         // プラグインの設定変更で項目数が減った場合
         let lsInitialNum = window.sv.pickLocalStorage(window.sv.lsInitialKey);
-        if (lsInitialNum >= form.groupList.length) {
-            lsInitialNum = form.groupList.length - 1;
+        if (lsInitialNum >= pager.getMax()) {
+            lsInitialNum = pager.getMax() - 1;
         }
+
         pager.active(lsInitialNum);
         pager.setCurrentPage(lsInitialNum);
-
-        form.initialView(lsInitialNum);
+        form.change(lsInitialNum, null);
 
         showSwipeArea(el);
 
@@ -391,13 +389,12 @@ jQuery.noConflict();
 
         // プラグインの設定変更で項目数が減った場合
         let lsInitialNum = window.sv.pickLocalStorage(window.sv.lsInitialKey);
-        if (lsInitialNum >= form.groupList.length) {
-            lsInitialNum = form.groupList.length - 1;
+        if (lsInitialNum >= pager.getMax()) {
+            lsInitialNum = pager.getMax() - 1;
         }
         pager.active(lsInitialNum);
         pager.setCurrentPage(lsInitialNum);
-
-        form.initialView(lsInitialNum);
+        form.change(lsInitialNum, null);
 
         let lsInputJson = window.sv.pickLocalStorage(window.sv.lsInputKey);
         if (Object.keys(lsInputJson).length > 0) {
