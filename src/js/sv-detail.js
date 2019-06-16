@@ -279,7 +279,7 @@ jQuery.noConflict();
 
     let restore = () => {
         let record = kintone.mobile.app.record.get();
-        let lsInputJson = window.sv.pickLocalStorage(window.sv.lsInputKey);
+        let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
         for (let fieldCode of Object.keys(lsInputJson)) {
             // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
             if (pluginConfig.svOptionList[fieldCode].type === 'SUBTABLE') {
@@ -323,10 +323,11 @@ jQuery.noConflict();
     let change = (event) => {
         let value = event.changes.field.value;
         let fieldCode = event.type.replace(/.*\./, '');
+        let recordId = event.recordId;
 
-        let lsInputJson = window.sv.pickLocalStorage(window.sv.lsInputKey);
+        let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
         lsInputJson[fieldCode] = value;
-        window.sv.saveLocalStorage(window.sv.lsInputKey, lsInputJson);
+        window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
 
         if (value !== '' && value !== undefined) {
             form.input(fieldCode);
@@ -376,6 +377,12 @@ jQuery.noConflict();
     }
 
     let showSwipeViewForWrite = (event) => {
+        if (event.type === 'mobile.app.record.create.show') {
+            window.sv.setLsInputKey(event.recordId);
+        } else if (event.type === 'mobile.app.record.edit.show') {
+            window.sv.setLsInputKey(event.recordId);
+        }
+
         let el = kintone.mobile.app.getHeaderSpaceElement();
 
         pager.setShowMode(false);
@@ -396,7 +403,7 @@ jQuery.noConflict();
         pager.setCurrentPage(lsInitialNum);
         form.change(lsInitialNum, null);
 
-        let lsInputJson = window.sv.pickLocalStorage(window.sv.lsInputKey);
+        let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
         if (Object.keys(lsInputJson).length > 0) {
             confirmRestore();
         }
@@ -449,7 +456,7 @@ jQuery.noConflict();
         'mobile.app.record.edit.submit.success'
     ];
     kintone.events.on(submitSuccessEventList, (event) => {
-        localStorage.removeItem(window.sv.lsInputKey);
+        localStorage.removeItem(window.sv.getLsInputKey());
         return event;
     });
 

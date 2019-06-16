@@ -37,25 +37,39 @@
         localStorage.setItem(key, JSON.stringify(data));
     }
 
+    // 新規/編集画面で入力したフィールドの保存用
+    let lsInputKey = '';
+    const setLsInputKey = (recordId) => {
+        if (recordId === undefined) {
+            recordId = 0; // 新規画面の場合
+        }
+        lsInputKey = `sv-${subdomain}-${appId}-${recordId}-input`;
+    }
+
+    const getLsInputKey = () => {
+        return lsInputKey;
+    }
+
+
     const conn = new kintoneJSSDK.Connection();
-    const kintoneApp = new kintoneJSSDK.App(conn);
-    const kintoneRecord = new kintoneJSSDK.Record(conn);
+//    const kintoneApp = new kintoneJSSDK.App(conn);
+ //   const kintoneRecord = new kintoneJSSDK.Record(conn);
     const appId = getAppId();
     const subdomain = window.location.hostname.split('.')[0];
-    const lsInputKey = `sv-${subdomain}-${appId}-input`; // 入力したフィールドの保存用
-    const lsListKey = `sv-${subdomain}-${appId}-list`;   // 一覧画面のレコードID保存用
+    const lsListKey = `sv-${subdomain}-${appId}-list`; // 一覧画面のレコードID保存用
     const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
 
     window.sv = window.sv || {};
 
     window.sv.pluginConfig = pluginConfig;
-    window.sv.kintoneApp = kintoneApp;
-    window.sv.kintoneRecord = kintoneRecord;
-    window.sv.appId = appId;
+    window.sv.kintoneApp = new kintoneJSSDK.App(conn);
+    window.sv.kintoneRecord = new kintoneJSSDK.Record(conn);
+    window.sv.appId = getAppId;
 
     window.sv.pickLocalStorage = pickLocalStorage;
     window.sv.saveLocalStorage = saveLocalStorage;
-    window.sv.lsInputKey = lsInputKey;
     window.sv.lsListKey = lsListKey;
     window.sv.lsInitialKey = lsInitialKey;
+    window.sv.setLsInputKey = setLsInputKey;
+    window.sv.getLsInputKey = getLsInputKey;
 })(kintone.$PLUGIN_ID);
