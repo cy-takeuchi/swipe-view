@@ -4,6 +4,14 @@ jQuery.noConflict();
 
     const originalPluginConfig = window.sv.pluginConfig;
 
+    const noInputsFieldOptionList = [
+        'RECORD_NUMBER',
+        'CREATED_TIME',
+        'CREATOR',
+        'UPDATED_TIME',
+        'MODIFIER'
+    ];
+
     let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + window.sv.appId;
     }
@@ -24,6 +32,11 @@ jQuery.noConflict();
         // optionListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
         let itemList = [], groupList = [], optionList = {}, num = 0;
         groupList[0] = {};
+
+        // changeイベントで利用するフィールドコードのデータ
+        // テーブルはテーブルのみで配下のフィールドは含まない
+        // グループは配下のフィールドのみを含む
+        let fieldCodeListForChangeEvent = [];
         for (let i of Object.keys(formLayoutList)) {
             let formLayout = formLayoutList[i];
             let rowType = formLayout.type;
@@ -39,14 +52,21 @@ jQuery.noConflict();
                     fieldLabel = fieldProperty.label;
 
                     // グループ内フィールドに必須フィールドがあればグループを必須とする
-                    let fieldListTwoDim = formLayout.layout.map((row) => row.fields.map(field => field.code));
-                    let underFieldList = [].concat(...fieldListTwoDim).map(fieldCode => fieldPropertyList[fieldCode]);
-                    for (let underField of underFieldList) {
-                        if (underField.required === true) {
+                    let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
+                    let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
+                    let underFieldCodeList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
+                    for (let underFieldCode of underFieldCodeList) {
+                        if (underFieldCode.required === true) {
                             fieldRequired = true;
                             break;
                         }
                     }
+
+                    formLayout.layout.map(row => row.fields.map(field => {
+                        if (noInputsFieldOptionList.includes(field.type) === false) {
+                            fieldCodeListForChangeEvent.push(field.code);
+                        }
+                    }));
                 } else if (rowType === 'SUBTABLE') {
                     // サブテーブルはラベルがないのでサブテーブルとする
                     fieldLabel = 'サブテーブル';
@@ -59,6 +79,8 @@ jQuery.noConflict();
                             break;
                         }
                     }
+
+                    fieldCodeListForChangeEvent.push(fieldCode);
                 }
 
                 itemList.push({
@@ -112,12 +134,16 @@ jQuery.noConflict();
                         required: fieldRequired
                     };
 
+                    if (noInputsFieldOptionList.includes(fieldType) === false) {
+                        fieldCodeListForChangeEvent.push(fieldCode);
+                    }
+
                     num++;
                 }
             }
         }
 
-        return [itemList, groupList, optionList];
+        return [itemList, groupList, optionList, fieldCodeListForChangeEvent];
     }
 
     let createValueNames = (columnList) => {
@@ -171,12 +197,11 @@ jQuery.noConflict();
     $('div#sv-save').append(saveButton.render());
 
     getFormFields().then((array) => {
-        // itemListは表（プラグイン設定画面の見た目）のデータ
-        // groupListは裏（詳細画面で利用する）のデータ
-        // optionListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
         let itemList = array[0];
         let groupList = array[1];
         let optionList = array[2];
+
+        let fieldCodeListForChangeEvent = array[3];
 
         let originalGroupList = originalPluginConfig.svGroupList;
 
@@ -359,14 +384,7 @@ jQuery.noConflict();
             let noInputs = $.extend(true, {}, groupList[0]);
             for (let fieldCode of Object.keys(noInputs)) {
                 let fieldType = optionList[fieldCode].type;
-                let noInputsFieldoptionList = [
-                    'RECORD_NUMBER',
-                    'CREATED_TIME',
-                    'CREATOR',
-                    'UPDATED_TIME',
-                    'MODIFIER'
-                ];
-                if (noInputsFieldoptionList.includes(fieldType)) {
+                if (noInputsFieldOptionList.includes(fieldType)) {
                     noInputs[fieldCode].shown = false;
                 } else {
                     noInputs[fieldCode].shown = true;
@@ -383,11 +401,10 @@ jQuery.noConflict();
             newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
 
             let changeEventList = [];
-            for (let fieldCode of Object.keys(groupList[0])) {
-                changeEventList.push(`mobile.app.record.create.change.${fieldCode}`);
-                changeEventList.push(`mobile.app.record.edit.change.${fieldCode}`);
+            for (let fieldCodeForChangeEvent of fieldCodeListForChangeEvent) {
+                changeEventList.push(`mobile.app.record.create.change.${fieldCodeForChangeEvent}`);
+                changeEventList.push(`mobile.app.record.edit.change.${fieldCodeForChangeEvent}`);
             }
-
             newPluginConfig.changeEventList = JSON.stringify(changeEventList);
 
             kintone.plugin.app.setConfig(newPluginConfig, () => {
