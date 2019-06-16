@@ -52,8 +52,6 @@
 
 
     const conn = new kintoneJSSDK.Connection();
-//    const kintoneApp = new kintoneJSSDK.App(conn);
- //   const kintoneRecord = new kintoneJSSDK.Record(conn);
     const appId = getAppId();
     const subdomain = window.location.hostname.split('.')[0];
     const lsListKey = `sv-${subdomain}-${appId}-list`; // 一覧画面のレコードID保存用
@@ -64,7 +62,7 @@
     window.sv.pluginConfig = pluginConfig;
     window.sv.kintoneApp = new kintoneJSSDK.App(conn);
     window.sv.kintoneRecord = new kintoneJSSDK.Record(conn);
-    window.sv.appId = getAppId;
+    window.sv.appId = appId;
 
     window.sv.pickLocalStorage = pickLocalStorage;
     window.sv.saveLocalStorage = saveLocalStorage;
