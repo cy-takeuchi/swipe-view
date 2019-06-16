@@ -300,6 +300,10 @@ jQuery.noConflict();
         kintone.events.on(changeEvent, change);
     }
 
+    let removeLocalStorage = () => {
+        localStorage.removeItem(window.sv.getLsInputKey());
+    }
+
     let confirmRestore = () => {
         $.confirm({
             title: false,
@@ -309,7 +313,8 @@ jQuery.noConflict();
             buttons: {
                 cancel: {
                     text: 'キャンセル',
-                    btnClass: 'btn-default'
+                    btnClass: 'btn-default',
+                    action: () => {removeLocalStorage()}
                 },
                 confirm: {
                     text: 'リストア',
@@ -456,7 +461,7 @@ jQuery.noConflict();
         'mobile.app.record.edit.submit.success'
     ];
     kintone.events.on(submitSuccessEventList, (event) => {
-        localStorage.removeItem(window.sv.getLsInputKey());
+        removeLocalStorage();
         return event;
     });
 
