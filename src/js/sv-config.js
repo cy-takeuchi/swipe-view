@@ -56,6 +56,7 @@ jQuery.noConflict();
                     let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
                     let underFieldCodeList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
                     for (let underFieldCode of underFieldCodeList) {
+                        // noInputsFieldOptionListの場合、.requiredはundefinedになる
                         if (underFieldCode.required === true) {
                             fieldRequired = true;
                             break;
