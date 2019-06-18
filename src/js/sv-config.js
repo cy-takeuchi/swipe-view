@@ -27,16 +27,24 @@ jQuery.noConflict();
         res = await window.sv.kintoneApp.getFormFields(window.sv.appId, 'DEFAULT', true);
         let fieldPropertyList = res.properties;
 
-        // itemListは表（プラグイン設定画面の見た目）のデータ
-        // groupListは裏（詳細画面で利用する）のデータ
-        // optionListはフィールドタイプ（リストアでフィールドタイプを判定するため）のデータ
-        let itemList = [], groupList = [], optionList = {}, num = 0;
-        groupList[0] = {};
+        /*
+         * itemListは表（プラグイン設定画面の見た目）のデータ
+         *   => テーブルのみ、グループのみ
+         * groupListは裏（詳細画面で利用する）のデータ
+         *   => テーブルのみ、グループのみ
+         * noInputsは未入力項目用のデータ
+         *   => テーブルのみ、グループのみ
+         * requiredInputsは必須入力項目用のデータ
+         *   => テーブルのみ、グループのみ
+         */
+        let itemList = [], groupList = [{}], noInputs = {}, requiredInputs = {}, num = 0;
 
-        // changeイベントで利用するフィールドコードのデータ
-        // テーブルはテーブルのみで配下のフィールドは含まない
-        // グループは配下のフィールドのみを含む
+        /*
+         * changeイベントで利用するフィールドコードのデータ
+         * テーブルはテーブルのみ、グループは配下のフィールドのみ
+         */
         let fieldCodeListForChangeEvent = [];
+
         for (let i of Object.keys(formLayoutList)) {
             let formLayout = formLayoutList[i];
             let rowType = formLayout.type;
@@ -96,9 +104,12 @@ jQuery.noConflict();
                     shown: false
                 };
 
-                optionList[fieldCode] = {
-                    type: rowType,
-                    required: fieldRequired
+                noInputs[fieldCode] = {
+                    shown: true
+                };
+
+                requiredInputs[fieldCode] = {
+                    shown: fieldRequired
                 };
 
                 num++;
@@ -130,9 +141,12 @@ jQuery.noConflict();
                         shown: false
                     };
 
-                    optionList[fieldCode] = {
-                        type: fieldType,
-                        required: fieldRequired
+                    noInputs[fieldCode] = {
+                        shown: !noInputsFieldOptionList.includes(fieldType)
+                    }
+
+                    requiredInputs[fieldCode] = {
+                        shown: fieldRequired
                     };
 
                     if (noInputsFieldOptionList.includes(fieldType) === false) {
@@ -144,7 +158,7 @@ jQuery.noConflict();
             }
         }
 
-        return [itemList, groupList, optionList, fieldCodeListForChangeEvent];
+        return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent];
     }
 
     let createValueNames = (columnList) => {
@@ -200,9 +214,10 @@ jQuery.noConflict();
     getFormFields().then((array) => {
         let itemList = array[0];
         let groupList = array[1];
-        let optionList = array[2];
+        let noInputs = array[2];
+        let requiredInputs = array[3];
 
-        let fieldCodeListForChangeEvent = array[3];
+        let fieldCodeListForChangeEvent = array[4];
 
         let originalGroupList = originalPluginConfig.svGroupList;
 
@@ -379,26 +394,7 @@ jQuery.noConflict();
 
             let newPluginConfig = {};
             newPluginConfig.svGroupList = JSON.stringify(groupList);
-            newPluginConfig.svOptionList = JSON.stringify(optionList);
-
-            // 未入力項目用の列を追加
-            let noInputs = $.extend(true, {}, groupList[0]);
-            for (let fieldCode of Object.keys(noInputs)) {
-                let fieldType = optionList[fieldCode].type;
-                if (noInputsFieldOptionList.includes(fieldType)) {
-                    noInputs[fieldCode].shown = false;
-                } else {
-                    noInputs[fieldCode].shown = true;
-                }
-            }
             newPluginConfig.svNoInputs = JSON.stringify(noInputs);
-
-            // 必須入力項目用の列を追加
-            let requiredInputs = $.extend(true, {}, groupList[0]);
-            for (let fieldCode of Object.keys(requiredInputs)) {
-                let fieldRequired = optionList[fieldCode].required;
-                requiredInputs[fieldCode].shown = fieldRequired;
-            }
             newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
 
             let changeEventList = [];
