@@ -282,7 +282,9 @@ jQuery.noConflict();
         let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
         for (let fieldCode of Object.keys(lsInputJson)) {
             // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
-            if (Array.isArray(lsInputJson[fieldCode]) === true) {
+            if (Array.isArray(lsInputJson[fieldCode]) === true
+                && lsInputJson[fieldCode].length > 0
+                && lsInputJson[fieldCode][0].id !== undefined) {
                 let table = lsInputJson[fieldCode];
                 for (let i = 0; i < table.length; i++) {
                     for (let key of Object.keys(table[i].value)) {
