@@ -63,10 +63,10 @@ jQuery.noConflict();
                     // グループ内フィールドに必須フィールドがあればグループを必須とする
                     let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
                     let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
-                    let underFieldCodeList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
-                    for (let underFieldCode of underFieldCodeList) {
+                    let underFieldList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
+                    for (let underField of underFieldList) {
                         // noInputsFieldOptionListの場合、.requiredはundefinedになる
-                        if (underFieldCode.required === true) {
+                        if (underField.required === true) {
                             fieldRequired = true;
                             break;
                         }
