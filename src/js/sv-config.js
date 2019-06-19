@@ -9,7 +9,8 @@ jQuery.noConflict();
         'CREATED_TIME',
         'CREATOR',
         'UPDATED_TIME',
-        'MODIFIER'
+        'MODIFIER',
+        'REFERENCE_TABLE'
     ];
 
     let getSettingsUrl = () => {
