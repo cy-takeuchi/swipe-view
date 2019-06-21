@@ -37,7 +37,16 @@ jQuery.noConflict();
             }
 
             for (let fieldCode of Object.keys(currentData)) {
-                if (beforeData === null) {
+                if (currentData[fieldCode].hasOwnProperty('fields') === true) { // グループフィールドの場合
+                    let shownList = currentData[fieldCode].fields.map((field) => currentData[field].shown);
+                    if (shownList.includes(true) === true) { // グループ配下のフィールドが1つでも表示の場合はグループも表示
+                        kintone.mobile.app.record.setFieldShown(fieldCode, true);
+                    } else {
+                        kintone.mobile.app.record.setFieldShown(fieldCode, false);
+                    }
+                } else if (beforeData === null) { // 初期表示（前項目がない場合）
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
+                } else if (beforeData[fieldCode] === undefined) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
                 } else if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
                     kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);

@@ -60,15 +60,47 @@ jQuery.noConflict();
                 if (rowType === 'GROUP') {
                     fieldLabel = fieldProperty.label;
 
+                    noInputs[fieldCode] = {
+                        fields: []
+                    };
+
                     // グループ内フィールドに必須フィールドがあればグループを必須とする
                     let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
                     let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
                     let underFieldList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
                     for (let underField of underFieldList) {
+                        itemList.push({
+                            num: num++,
+                            label: underField.label,
+                            code: underField.code,
+                            type: underField.type,
+                            column0: '×',
+                            underGroup: true
+                        });
+
+                        groupList[0][underField.code] = {
+                            shown: true
+                        };
+
                         // noInputsFieldOptionListの場合、.requiredはundefinedになる
                         if (underField.required === true) {
                             fieldRequired = true;
-                            break;
+                        }
+
+                        noInputs[fieldCode].fields.push(underField.code);
+                        noInputs[underField.code] = {
+                            shown: !noInputsFieldOptionList.includes(underField.type),
+                            group: fieldCode
+                        };
+
+                        if (noInputsFieldOptionList.includes(underField.type) === false) {
+                            requiredInputs[underField.code] = {
+                                shown: underField.required
+                            }
+                        } else if (noInputsFieldOptionList.includes(underField.type) === true) {
+                            requiredInputs[underField.code] = {
+                                shown: false
+                            }
                         }
                     }
 
@@ -94,26 +126,21 @@ jQuery.noConflict();
                 }
 
                 itemList.push({
-                    num: num,
+                    num: num++,
                     label: fieldLabel,
                     code: fieldCode,
                     type: rowType,
-                    column0: '×'
+                    column0: '×',
+                    underGroup: false
                 });
 
                 groupList[0][fieldCode] = {
                     shown: false
                 };
 
-                noInputs[fieldCode] = {
-                    shown: true
-                };
-
                 requiredInputs[fieldCode] = {
                     shown: fieldRequired
                 };
-
-                num++;
             } else if (rowType === 'ROW') {
                 let fieldList = formLayout.fields;
                 for (let j = 0; j < fieldList.length; j++) {
@@ -131,7 +158,7 @@ jQuery.noConflict();
                     }
 
                     itemList.push({
-                        num: num,
+                        num: num++,
                         label: fieldLabel,
                         code: fieldCode,
                         type: fieldType,
@@ -153,8 +180,6 @@ jQuery.noConflict();
                     if (noInputsFieldOptionList.includes(fieldType) === false) {
                         fieldCodeListForChangeEvent.push(fieldCode);
                     }
-
-                    num++;
                 }
             }
         }
@@ -245,6 +270,8 @@ jQuery.noConflict();
 
                     if (item === undefined) { // プラグイン設定後にフィールドを削除した場合
                         delete originalGroupList[j][fieldCode];
+                    } else if (item.underGroup === true) { // グループ配下のフィールドの場合
+                        originalGroupList[j][fieldCode] = {shown: true};
                     } else if (originalGroupList[j][fieldCode] === undefined) { // プラグイン設定後にフィールドを追加した場合
                         originalGroupList[j][fieldCode] = {shown: false};
                         item[`column${j}`] = '×';
@@ -264,6 +291,7 @@ jQuery.noConflict();
             item: createListHeader(columnList)
         };
 
+        itemList = itemList.filter(item => item.underGroup === false); // グループ配下のフィールドを除く
         let list = new List('sv-list', options, itemList);
 
         changeMinusButton();
