@@ -338,17 +338,12 @@ jQuery.noConflict();
 
     let change = (event) => {
         let value = event.changes.field.value;
-        let fieldCode = event.type.replace(/.*\./, '');
-        let recordId = event.recordId;
-
-        let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-        lsInputJson[fieldCode] = value;
-        window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
-
         if (value !== '' && value !== undefined) {
+            let fieldCode = event.type.replace(/.*\./, '');
+            let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
+            lsInputJson[fieldCode] = value;
+            window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
             form.input(fieldCode);
-        } else {
-            form.shown(fieldCode);
         }
     }
 
