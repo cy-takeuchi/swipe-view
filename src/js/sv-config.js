@@ -162,7 +162,8 @@ jQuery.noConflict();
                         label: fieldLabel,
                         code: fieldCode,
                         type: fieldType,
-                        column0: '×'
+                        column0: '×',
+                        underGroup: false
                     });
 
                     groupList[0][fieldCode] = {
