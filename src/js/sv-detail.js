@@ -324,9 +324,9 @@ jQuery.noConflict();
         let content = '';
         if (diff < 60 * 60) {
             content += '先程入力していたデータがあります。<br />';
-        } else if (isToday(now, updatedTime) === true) {
+        } else if (window.sv.isToday(now, updatedTime) === true) {
             content += '本日入力していたデータがあります。<br />';
-        } else if (isYesterday(now, updatedTime) === true) {
+        } else if (window.sv.isYesterday(now, updatedTime) === true) {
             content += '昨日入力していたデータがあります。<br />';
         } else {
             content += '入力途中のデータがあります。<br />';

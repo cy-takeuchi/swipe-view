@@ -110,4 +110,6 @@
     window.sv.setLsInputKey = setLsInputKey;
     window.sv.getLsInputKey = getLsInputKey;
     window.sv.getPrettyDate = getPrettyDate;
+    window.sv.isToday = isToday;
+    window.sv.isYesterday = isYesterday;
 })(kintone.$PLUGIN_ID);
