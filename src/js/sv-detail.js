@@ -286,7 +286,7 @@ jQuery.noConflict();
         $(el).append(html);
     }
 
-    let restore = (lsInputJson) => {
+    let restore = async (lsInputJson) => {
         let record = kintone.mobile.app.record.get();
         let inputRecords = lsInputJson.records;
 
@@ -316,7 +316,7 @@ jQuery.noConflict();
         localStorage.removeItem(window.sv.getLsInputKey());
     }
 
-    let confirmRestore = (lsInputJson) => {
+    let confirmRestore = (lsInputJson, lsInitialNum) => {
         let updatedTime = lsInputJson.updatedTime;
         let now = new Date().getTime();
         let diff = (now - updatedTime) / 1000;
@@ -333,21 +333,29 @@ jQuery.noConflict();
         }
         content += 'リストアしますか？<br />';
         content += `入力日時: ${window.sv.getPrettyDate(updatedTime)}`;
+
         $.confirm({
             title: false,
             content: content,
-            backgroundDismiss: true,
+            //backgroundDismiss: true,
             useBootstrap: false,
             buttons: {
                 cancel: {
                     text: 'キャンセル',
                     btnClass: 'btn-default',
-                    action: () => {removeLocalStorage()}
+                    action: () => {
+                        form.change(lsInitialNum, null);
+                        removeLocalStorage();
+                    }
                 },
                 confirm: {
                     text: 'リストア',
                     btnClass: 'btn-blue',
-                    action: () => {restore(lsInputJson)}
+                    action: () => {
+                        restore(lsInputJson).then((e) => {
+                            form.change(lsInitialNum, null);
+                        });
+                    }
                 }
             }
         });
@@ -439,11 +447,12 @@ jQuery.noConflict();
         }
         pager.active(lsInitialNum);
         pager.setCurrentPage(lsInitialNum);
-        form.change(lsInitialNum, null);
 
         let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-        if (lsInputJson !== null) {
-            confirmRestore(lsInputJson);
+        if (lsInputJson !== null) { // 未入力項目への反映はリストアしてから
+            confirmRestore(lsInputJson, lsInitialNum);
+        } else {
+            form.change(lsInitialNum, null);
         }
 
         showSwipeArea(el);
