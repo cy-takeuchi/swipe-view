@@ -470,8 +470,6 @@ jQuery.noConflict();
             onend: dragEndListener
         });
 
-        $(document).on('click touchstart', 'span#ok', restore);
-
         return event;
     }
 
