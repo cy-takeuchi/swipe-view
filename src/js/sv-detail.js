@@ -286,15 +286,16 @@ jQuery.noConflict();
         $(el).append(html);
     }
 
-    let restore = () => {
+    let restore = (lsInputJson) => {
         let record = kintone.mobile.app.record.get();
-        let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-        for (let fieldCode of Object.keys(lsInputJson)) {
+        let inputRecords = lsInputJson.records;
+
+        for (let fieldCode of Object.keys(inputRecords)) {
             // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
-            if (Array.isArray(lsInputJson[fieldCode]) === true
-                && lsInputJson[fieldCode].length > 0
-                && lsInputJson[fieldCode][0].id !== undefined) {
-                let table = lsInputJson[fieldCode];
+            if (Array.isArray(inputRecords[fieldCode]) === true
+                && inputRecords[fieldCode].length > 0
+                && inputRecords[fieldCode][0].id !== undefined) {
+                let table = inputRecords[fieldCode];
                 for (let i = 0; i < table.length; i++) {
                     for (let key of Object.keys(table[i].value)) {
                         if (table[i].value[key].value === undefined) {
@@ -303,7 +304,7 @@ jQuery.noConflict();
                     }
                 }
             }
-            record.record[fieldCode].value = lsInputJson[fieldCode];
+            record.record[fieldCode].value = inputRecords[fieldCode];
             form.input(fieldCode, pager.getNoInputsNum());
         }
         kintone.events.off(changeEvent, change);
@@ -315,10 +316,14 @@ jQuery.noConflict();
         localStorage.removeItem(window.sv.getLsInputKey());
     }
 
-    let confirmRestore = () => {
+    let confirmRestore = (lsInputJson) => {
+        let content = '';
+        content += '入力途中のデータがあります。<br />';
+        content += 'リストアしますか？<br />';
+        content += `入力日時: ${lsInputJson.update}`;
         $.confirm({
             title: false,
-            content: '入力途中のデータがあります。<br />リストアしますか？',
+            content: content,
             backgroundDismiss: true,
             useBootstrap: false,
             buttons: {
@@ -330,7 +335,7 @@ jQuery.noConflict();
                 confirm: {
                     text: 'リストア',
                     btnClass: 'btn-blue',
-                    action: () => {restore()}
+                    action: () => {restore(lsInputJson)}
                 }
             }
         });
@@ -341,7 +346,17 @@ jQuery.noConflict();
         if (value !== '' && value !== undefined) {
             let fieldCode = event.type.replace(/.*\./, '');
             let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-            lsInputJson[fieldCode] = value;
+            if (lsInputJson === null) {
+                lsInputJson = {
+                    update: window.sv.getPrettyDate(),
+                    records: {
+                        [fieldCode]: value
+                    }
+                };
+            } else {
+                lsInputJson.update = window.sv.getPrettyDate();
+                lsInputJson.records[fieldCode] = value;
+            }
             window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
             form.input(fieldCode);
         }
@@ -415,8 +430,8 @@ jQuery.noConflict();
         form.change(lsInitialNum, null);
 
         let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-        if (Object.keys(lsInputJson).length > 0) {
-            confirmRestore();
+        if (lsInputJson !== null) {
+            confirmRestore(lsInputJson);
         }
 
         showSwipeArea(el);

@@ -23,7 +23,7 @@
 
     const pickLocalStorage = (key) => {
         let data = localStorage.getItem(key);
-        let result = {}
+        let result = null;
         if (data !== null) {
             result = JSON.parse(data);
         } else if (data === null && key === lsInitialKey) {
@@ -50,6 +50,19 @@
         return lsInputKey;
     }
 
+    const getPrettyDate = () => {
+        let date = new Date();
+        let y = date.getFullYear();
+        let m = date.getMonth() + 1;
+        let d = date.getDate();
+        let w = date.getDay();
+        let h = date.getHours();
+        let mm = date.getMinutes();
+        let wNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+        return `${y}年${m}月${d}日 (${wNames[w]}) ${h}時${mm}分`;
+    }
+
 
     const conn = new kintoneJSSDK.Connection();
     const appId = getAppId();
@@ -70,4 +83,5 @@
     window.sv.lsInitialKey = lsInitialKey;
     window.sv.setLsInputKey = setLsInputKey;
     window.sv.getLsInputKey = getLsInputKey;
+    window.sv.getPrettyDate = getPrettyDate;
 })(kintone.$PLUGIN_ID);
