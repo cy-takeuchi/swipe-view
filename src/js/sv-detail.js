@@ -317,10 +317,22 @@ jQuery.noConflict();
     }
 
     let confirmRestore = (lsInputJson) => {
+        let updatedTime = lsInputJson.updatedTime;
+        let now = new Date().getTime();
+        let diff = (now - updatedTime) / 1000;
+
         let content = '';
-        content += '入力途中のデータがあります。<br />';
+        if (diff < 60 * 60) {
+            content += '先程入力していたデータがあります。<br />';
+        } else if (isToday(now, updatedTime) === true) {
+            content += '本日入力していたデータがあります。<br />';
+        } else if (isYesterday(now, updatedTime) === true) {
+            content += '昨日入力していたデータがあります。<br />';
+        } else {
+            content += '入力途中のデータがあります。<br />';
+        }
         content += 'リストアしますか？<br />';
-        content += `入力日時: ${lsInputJson.update}`;
+        content += `入力日時: ${window.sv.getPrettyDate(updatedTime)}`;
         $.confirm({
             title: false,
             content: content,
@@ -348,13 +360,13 @@ jQuery.noConflict();
             let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
             if (lsInputJson === null) {
                 lsInputJson = {
-                    update: window.sv.getPrettyDate(),
+                    updatedTime: new Date().getTime(),
                     records: {
                         [fieldCode]: value
                     }
                 };
             } else {
-                lsInputJson.update = window.sv.getPrettyDate();
+                lsInputJson.updatedTime = new Date().getTime();
                 lsInputJson.records[fieldCode] = value;
             }
             window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
