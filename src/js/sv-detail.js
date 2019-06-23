@@ -314,7 +314,7 @@ jQuery.noConflict();
         $(el).append(html);
     }
 
-    let restore = async (lsInputJson) => {
+    let restoreData = async (lsInputJson) => {
         let record = kintone.mobile.app.record.get();
         let inputRecords = lsInputJson.records;
 
@@ -335,9 +335,9 @@ jQuery.noConflict();
             record.record[fieldCode].value = inputRecords[fieldCode];
             form.input(fieldCode, pager.getNoInputsNum());
         }
-        kintone.events.off(changeEvent, change);
+        kintone.events.off(changeEvent, changeData);
         kintone.mobile.app.record.set(record);
-        kintone.events.on(changeEvent, change);
+        kintone.events.on(changeEvent, changeData);
     }
 
     let removeLocalStorage = () => {
@@ -380,7 +380,7 @@ jQuery.noConflict();
                     text: 'リストア',
                     btnClass: 'btn-blue',
                     action: () => {
-                        restore(lsInputJson).then((e) => {
+                        restoreData(lsInputJson).then((e) => {
                             form.change(lsInitialNum, null);
                         });
                     }
@@ -389,7 +389,7 @@ jQuery.noConflict();
         });
     }
 
-    let change = (event) => {
+    let changeData = (event) => {
         let value = event.changes.field.value;
         if (value !== '' && value !== undefined) {
             let fieldCode = event.type.replace(/.*\./, '');
@@ -520,7 +520,7 @@ jQuery.noConflict();
 
 
     let changeEvent = pluginConfig.changeEventList;
-    kintone.events.on(changeEvent, change);
+    kintone.events.on(changeEvent, changeData);
 
 
 
