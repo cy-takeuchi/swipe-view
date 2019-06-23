@@ -13,6 +13,18 @@
     }
 
     /*
+     * 入力できないので未入力項目に表示しないフィールドタイプ
+     */
+    const noInputsFieldOptionList = [
+        'RECORD_NUMBER',
+        'CREATED_TIME',
+        'CREATOR',
+        'UPDATED_TIME',
+        'MODIFIER',
+        'REFERENCE_TABLE'
+    ];
+
+    /*
      * changeイベントが発動しないので項目移動時に保存するフィールドタイプ
      */
     const notWorkChangeEventFieldTypeList = [
@@ -109,6 +121,7 @@
     window.sv = window.sv || {};
 
     window.sv.pluginConfig = pluginConfig;
+    window.sv.noInputsFieldOptionList = noInputsFieldOptionList;
     window.sv.notWorkChangeEventFieldTypeList = notWorkChangeEventFieldTypeList;
 
     window.sv.kintoneApp = new kintoneJSSDK.App(conn);

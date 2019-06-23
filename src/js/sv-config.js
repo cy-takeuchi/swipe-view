@@ -3,15 +3,7 @@ jQuery.noConflict();
     'use strict';
 
     const originalPluginConfig = window.sv.pluginConfig;
-
-    const noInputsFieldOptionList = [
-        'RECORD_NUMBER',
-        'CREATED_TIME',
-        'CREATOR',
-        'UPDATED_TIME',
-        'MODIFIER',
-        'REFERENCE_TABLE'
-    ];
+    const noInputsFieldOptionList = window.sv.noInputsFieldOptionList;
 
     let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + window.sv.appId;
