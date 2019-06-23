@@ -176,7 +176,7 @@ jQuery.noConflict();
 
                     noInputs[fieldCode] = {
                         shown: !noInputsFieldOptionList.includes(fieldType)
-                    }
+                    };
 
                     requiredInputs[fieldCode] = {
                         shown: fieldRequired
