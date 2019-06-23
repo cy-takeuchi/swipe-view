@@ -113,6 +113,10 @@ jQuery.noConflict();
                     // サブテーブルはラベルがないのでサブテーブルとする
                     fieldLabel = 'サブテーブル';
 
+                    noInputs[fieldCode] = {
+                        shown: true
+                    };
+
                     // サブテーブル内フィールドに必須フィールドがあればサブテーブルを必須とする
                     let underFieldList = fieldProperty.fields;
                     for (let underFieldCode of Object.keys(underFieldList)) {

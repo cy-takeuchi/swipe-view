@@ -12,6 +12,16 @@
         return;
     }
 
+    /*
+     * changeイベントが発動しないので項目移動時に保存するフィールドタイプ
+     */
+    const notWorkChangeEventFieldTypeList = [
+        'SUBTABLE',
+        'MULTI_LINE_TEXT',
+        'RICH_TEXT',
+        'LINK'
+    ];
+
     const getAppId = () => {
         let id = kintone.mobile.app.getId();
         if (id === null) {
@@ -99,6 +109,8 @@
     window.sv = window.sv || {};
 
     window.sv.pluginConfig = pluginConfig;
+    window.sv.notWorkChangeEventFieldTypeList = notWorkChangeEventFieldTypeList;
+
     window.sv.kintoneApp = new kintoneJSSDK.App(conn);
     window.sv.kintoneRecord = new kintoneJSSDK.Record(conn);
     window.sv.appId = appId;
