@@ -122,7 +122,7 @@ jQuery.noConflict();
             }
 
             let html = '';
-            html += '<div>';
+            html += '<div id="sv-main">';
             html += `<ul id="${pagerId}">`;
             for (let i = 0; i < max; i++) {
                 html += `<li><a href="javascript:void(0)">${i + 1}</a></li>`;
