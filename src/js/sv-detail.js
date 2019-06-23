@@ -150,29 +150,33 @@ jQuery.noConflict();
     let form = new Form();
     let pager = new Pager();
 
-    let saveData = () => {
+    let saveData = (fieldCode, value) => {
+        if (value !== '' && value !== undefined) {
+            let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
+            if (lsInputJson === null) {
+                lsInputJson = {
+                    updatedTime: new Date().getTime(),
+                    records: {
+                        [fieldCode]: value
+                    }
+                };
+            } else {
+                lsInputJson.updatedTime = new Date().getTime();
+                lsInputJson.records[fieldCode] = value;
+            }
+            window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
+            form.input(fieldCode);
+        }
+    }
+
+    let saveDataNotWorkChangeEventField = () => {
         let record = kintone.mobile.app.record.get();
 
         let fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
             window.sv.notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
         fieldCodeList.map((fieldCode) => {
             let value = record.record[fieldCode].value;
-            if (value !== '' && value !== undefined) {
-                let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-                if (lsInputJson === null) {
-                    lsInputJson = {
-                        updatedTime: new Date().getTime(),
-                        records: {
-                            [fieldCode]: value
-                        }
-                    };
-                } else {
-                    lsInputJson.updatedTime = new Date().getTime();
-                    lsInputJson.records[fieldCode] = value;
-                }
-                window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
-                form.input(fieldCode);
-            }
+            saveData(fieldCode, value);
         });
     }
 
@@ -191,7 +195,7 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveData();
+        saveDataNotWorkChangeEventField();
     }
 
     let prevColumn = () => {
@@ -209,7 +213,7 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveData();
+        saveDataNotWorkChangeEventField();
     }
 
     let nextRecord = () => {
@@ -391,23 +395,8 @@ jQuery.noConflict();
 
     let changeData = (event) => {
         let value = event.changes.field.value;
-        if (value !== '' && value !== undefined) {
-            let fieldCode = event.type.replace(/.*\./, '');
-            let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
-            if (lsInputJson === null) {
-                lsInputJson = {
-                    updatedTime: new Date().getTime(),
-                    records: {
-                        [fieldCode]: value
-                    }
-                };
-            } else {
-                lsInputJson.updatedTime = new Date().getTime();
-                lsInputJson.records[fieldCode] = value;
-            }
-            window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
-            form.input(fieldCode);
-        }
+        let fieldCode = event.type.replace(/.*\./, '');
+        saveData(fieldCode, value);
     }
 
 
@@ -546,7 +535,7 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveData();
+        saveDataNotWorkChangeEventField();
     });
 
 })(jQuery);
