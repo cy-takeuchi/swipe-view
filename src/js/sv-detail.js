@@ -344,7 +344,7 @@ jQuery.noConflict();
         kintone.events.on(changeEvent, changeData);
     }
 
-    let removeLocalStorage = () => {
+    let removeData = () => {
         localStorage.removeItem(window.sv.getLsInputKey());
     }
 
@@ -377,7 +377,7 @@ jQuery.noConflict();
                     btnClass: 'btn-default',
                     action: () => {
                         form.change(lsInitialNum, null);
-                        removeLocalStorage();
+                        removeData();
                     }
                 },
                 confirm: {
@@ -518,7 +518,7 @@ jQuery.noConflict();
         'mobile.app.record.edit.submit.success'
     ];
     kintone.events.on(submitSuccessEventList, (event) => {
-        removeLocalStorage();
+        removeData();
         return event;
     });
 
