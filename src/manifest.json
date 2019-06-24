@@ -40,6 +40,7 @@
       "js/jquery-confirm-3.3.4.min.js",
       "js/interact-1.4.9.min.js",
       "js/sv-common.js",
+      "js/sv-image.js",
       "js/sv-detail.js"
     ],
     "css": [

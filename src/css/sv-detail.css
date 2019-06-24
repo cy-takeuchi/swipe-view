@@ -20,9 +20,9 @@ div#sv-main {
 div#sv-swipe-element {
   pointer-events: auto;
   z-index: 1000;
-  background-color: green;
+  background-color: #badc58;
   border-radius: 10px;
-  padding: 20px;
+  padding: 32px;
   touch-action: none;
   user-select: none; }
   div#sv-swipe-element:after {

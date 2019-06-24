@@ -313,7 +313,7 @@ jQuery.noConflict();
     let showSwipeArea = (el) => {
         let html = '';
         html += '<div id="sv-swipe-area">';
-        html += `<div id="${swipeElement}"></div>`;
+        html += `<div id="${swipeElement}" style="background-image:url(${window.sv.imageFingerPrint});"></div>`;
         html += '</div>';
         $(el).append(html);
     }
