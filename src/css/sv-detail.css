@@ -41,7 +41,6 @@ div#sv-swipe-area {
     position: fixed;
     bottom: 65px;
     transform: translate3d(0, 0, 0);
-    background-color: gold;
     opacity: 0.6;
     padding: 30px;
     left: calc(192vw - 123px);

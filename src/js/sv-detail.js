@@ -475,7 +475,7 @@ jQuery.noConflict();
         showSwipeArea(el);
 
         interact(`#${swipeElement}`).draggable({
-            inertia: true,
+            inertia: false,
             modifiers: [
                 interact.modifiers.restrict({
                     restriction: 'parent',
