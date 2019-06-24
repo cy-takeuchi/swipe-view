@@ -1,0 +1,93 @@
+$pager-base-color: #4b4b4b;
+
+div#sv-main {
+    border-bottom: 3px solid $pager-base-color;
+
+    ul#sv-pager {
+        display: inline-block;
+        margin: 20px 20px 0px 20px;
+        padding: 0px;
+
+        li {
+            display: inline;
+            padding: 8px 12px 0px 12px;
+
+            a {
+                color: $pager-base-color;
+                font-weight: bold;
+            }
+        }
+
+        li.sv-pager-active {
+            background-color: $pager-base-color;
+            border-radius: 8px 8px 0px 0px;
+
+            a {
+                color: #ffffff;
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+div#sv-swipe-element {
+    pointer-events: auto;
+    z-index: 1000;
+    background-color: green;
+    border-radius: 10px;
+    padding: 20px;
+    touch-action: none;
+    user-select: none;
+
+    &:after {
+        content: attr(data-value);
+        text-align: center;
+        position: absolute;
+        top: -1.5em;
+        margin-left: 1.0em;
+    }
+}
+
+$mq-breakpoints: (
+  'small' : 480px,
+  'medium': 600px,
+  'large' : 960px
+);
+
+@mixin mq($breakpoint: medium, $rule: min, $subtraction: false) {
+  $breakpoint: map_get($mq-breakpoints, $breakpoint);
+  @if $rule == max and $subtraction {
+    $breakpoint: $breakpoint - 1;
+  }
+  @media screen and (#{$rule}-width: $breakpoint) {
+    @content;
+  }
+}
+
+div#sv-swipe-area {
+    pointer-events: none;
+    z-index: 999;
+    position: fixed;
+    bottom: 65px;
+    transform: translate3d(0, 0, 0);
+    opacity: 0.6;
+    padding: 30px;
+    left: calc(192vw - 123px);
+
+    @include mq(small, max) {
+        width: 15vw;
+        height: 5vh;
+    }
+    @include mq(medium, max) {
+        width: 12vw;
+        height: 7vh;
+    }
+    @include mq(large, max, true) {
+        width: 9vw;
+        height: 8vh;
+    }
+    @include mq(large, min) {
+        width: 6vw;
+        height: 8vh;
+    }
+}

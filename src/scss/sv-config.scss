@@ -1,0 +1,43 @@
+div#sv-list {
+
+    input#sv-search-label {
+        width: 120px;
+    }
+
+    input#sv-search-code {
+        width: 120px;
+    }
+
+    th {
+        padding: 8px 16px;
+        text-align: center;
+    }
+
+    td {
+        padding: 8px 16px;
+
+        div {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    }
+
+    td.label, td.code, td.type {
+        width: 150px;
+        white-space: nowrap;
+    }
+
+    span {
+        &.sv-plus {
+            cursor: pointer;
+        }
+
+        &.sv-minus {
+            cursor: pointer;
+        }
+    }
+
+    &.sv-display-none {
+        display: none;
+    }
+}

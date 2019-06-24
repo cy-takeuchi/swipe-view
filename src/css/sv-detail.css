@@ -1,85 +1,59 @@
 div#sv-main {
-    border-bottom: 3px solid #4b4b4b;
-}
-
-ul#sv-pager {
+  border-bottom: 3px solid #4b4b4b; }
+  div#sv-main ul#sv-pager {
     display: inline-block;
     margin: 20px 20px 0px 20px;
-    padding: 0px;
-}
+    padding: 0px; }
+    div#sv-main ul#sv-pager li {
+      display: inline;
+      padding: 8px 12px 0px 12px; }
+      div#sv-main ul#sv-pager li a {
+        color: #4b4b4b;
+        font-weight: bold; }
+    div#sv-main ul#sv-pager li.sv-pager-active {
+      background-color: #4b4b4b;
+      border-radius: 8px 8px 0px 0px; }
+      div#sv-main ul#sv-pager li.sv-pager-active a {
+        color: #ffffff;
+        font-weight: bold; }
 
-ul#sv-pager li {
-    display: inline;
-    padding: 8px 12px 0px 12px;
-}
-
-ul#sv-pager li.sv-pager-active {
-    background-color: #4b4b4b;
-    border-radius: 8px 8px 0px 0px;
-}
-
-ul#sv-pager li a {
-    color: #4b4b4b;
-    font-weight: bold;
-}
-
-ul#sv-pager li.sv-pager-active a {
-    color: #ffffff;
-    font-weight: bold;
-}
-
-div#sv-swipe-element:after {
+div#sv-swipe-element {
+  pointer-events: auto;
+  z-index: 1000;
+  background-color: green;
+  border-radius: 10px;
+  padding: 20px;
+  touch-action: none;
+  user-select: none; }
+  div#sv-swipe-element:after {
     content: attr(data-value);
     text-align: center;
     position: absolute;
     top: -1.5em;
-    margin-left: 1.0em;
-}
+    margin-left: 1.0em; }
+
 div#sv-swipe-area {
-    pointer-events: none;
-    z-index: 999;
-    position: fixed;
-    bottom: 65px;
-    transform: translate3d(0, 0, 0);
-    opacity: 0.6;
-    padding: 30px;
-    left: calc(192vw - 123px);
-}
-
-div#sv-swipe-element {
-    pointer-events: auto;
-    z-index: 1000;
-    background-color: green;
-    border-radius: 10px;
-    padding: 20px;
-    touch-action: none;
-    user-select: none;
-}
-
-@media screen and (max-width: 479px) {
+  pointer-events: none;
+  z-index: 999;
+  position: fixed;
+  bottom: 65px;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.6;
+  padding: 30px;
+  left: calc(192vw - 123px); }
+  @media screen and (max-width: 480px) {
     div#sv-swipe-area {
-        width: 15vw;
-        height: 5vh;
-    }
-}
-
-@media screen and (min-width:480px) and (max-width:599px) {
+      width: 15vw;
+      height: 5vh; } }
+  @media screen and (max-width: 600px) {
     div#sv-swipe-area {
-        width: 12vw;
-        height: 7vh;
-    }
-}
-
-@media screen and (min-width:600px) and (max-width:959px) {
+      width: 12vw;
+      height: 7vh; } }
+  @media screen and (max-width: 959px) {
     div#sv-swipe-area {
-        width: 9vw;
-        height: 8vh;
-    }
-}
-
-@media screen and (min-width:960px) {
+      width: 9vw;
+      height: 8vh; } }
+  @media screen and (min-width: 960px) {
     div#sv-swipe-area {
-        width: 6vw;
-        height: 8vh;
-    }
-}
+      width: 6vw;
+      height: 8vh; } }
