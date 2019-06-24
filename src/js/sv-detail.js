@@ -151,7 +151,7 @@ jQuery.noConflict();
     let pager = new Pager();
 
     let saveData = (fieldCode, value) => {
-        if (value !== '' && value !== undefined) {
+        if (pager.getShowMode() === false && value !== '' && value !== undefined) {
             let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
             if (lsInputJson === null) {
                 lsInputJson = {
