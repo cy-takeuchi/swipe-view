@@ -8,6 +8,20 @@ div#sv-list {
         width: 120px;
     }
 
+    &.sv-display-none {
+        display: none;
+    }
+
+    span {
+        &.sv-plus {
+            cursor: pointer;
+        }
+
+        &.sv-minus {
+            cursor: pointer;
+        }
+    }
+
     th {
         padding: 8px 16px;
         text-align: center;
@@ -25,19 +39,5 @@ div#sv-list {
     td.label, td.code, td.type {
         width: 150px;
         white-space: nowrap;
-    }
-
-    span {
-        &.sv-plus {
-            cursor: pointer;
-        }
-
-        &.sv-minus {
-            cursor: pointer;
-        }
-    }
-
-    &.sv-display-none {
-        display: none;
     }
 }

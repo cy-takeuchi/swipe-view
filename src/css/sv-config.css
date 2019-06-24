@@ -4,6 +4,15 @@ div#sv-list input#sv-search-label {
 div#sv-list input#sv-search-code {
   width: 120px; }
 
+div#sv-list.sv-display-none {
+  display: none; }
+
+div#sv-list span.sv-plus {
+  cursor: pointer; }
+
+div#sv-list span.sv-minus {
+  cursor: pointer; }
+
 div#sv-list th {
   padding: 8px 16px;
   text-align: center; }
@@ -17,12 +26,3 @@ div#sv-list td {
 div#sv-list td.label, div#sv-list td.code, div#sv-list td.type {
   width: 150px;
   white-space: nowrap; }
-
-div#sv-list span.sv-plus {
-  cursor: pointer; }
-
-div#sv-list span.sv-minus {
-  cursor: pointer; }
-
-div#sv-list.sv-display-none {
-  display: none; }
