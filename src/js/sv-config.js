@@ -141,7 +141,7 @@ jQuery.noConflict();
                 let fieldList = formLayout.fields;
                 for (let j = 0; j < fieldList.length; j++) {
                     let fieldType = fieldList[j].type;
-                    if (fieldType === 'HR' || fieldType === 'SPACER') {
+                    if (window.sv.notCoveredFieldTypeList.includes(fieldType) === true) {
                         continue;
                     }
 

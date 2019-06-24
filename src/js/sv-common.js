@@ -13,6 +13,15 @@
     }
 
     /*
+     * フィールドコードがなく、本プラグインが対象外とするフィールドタイプ
+     */
+    const notCoveredFieldTypeList = [
+        'HR',
+        'SPACER',
+        'LABEL'
+    ];
+
+    /*
      * 入力できないので未入力項目に表示しないフィールドタイプ
      */
     const noInputsFieldOptionList = [
@@ -121,6 +130,7 @@
     window.sv = window.sv || {};
 
     window.sv.pluginConfig = pluginConfig;
+    window.sv.notCoveredFieldTypeList = notCoveredFieldTypeList;
     window.sv.noInputsFieldOptionList = noInputsFieldOptionList;
     window.sv.notWorkChangeEventFieldTypeList = notWorkChangeEventFieldTypeList;
 
