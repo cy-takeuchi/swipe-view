@@ -7,62 +7,6 @@ jQuery.noConflict();
 
     const pluginConfig = window.sv.pluginConfig;
 
-    class Form {
-        constructor() {
-            this.groupList = [];
-            this.noInputs = {};
-            this.requiredInputs = {};
-            this.showMode = false;
-        }
-
-        change(current, before) {
-            let currentData = [];
-            if (pager.isRequiredInputsPage(current) === true) {
-                currentData = this.requiredInputs;
-            } else if (pager.isNoInputsPage(current) === true) {
-                currentData = this.noInputs;
-            } else {
-                currentData = this.groupList[current];
-            }
-
-            let beforeData = [];
-            if (before === null) { // 初期表示（前項目がない場合）
-                beforeData = null;
-            } else if (pager.isRequiredInputsPage(before) === true) {
-                beforeData = this.requiredInputs;
-            } else if (pager.isNoInputsPage(before) === true) {
-                beforeData = this.noInputs;
-            } else {
-                beforeData = this.groupList[before];
-            }
-
-            for (let fieldCode of Object.keys(currentData)) {
-                if (currentData[fieldCode].hasOwnProperty('fields') === true) { // グループフィールドの場合
-                    let shownList = currentData[fieldCode].fields.map((field) => currentData[field].shown);
-                    if (shownList.includes(true) === true) { // グループ配下のフィールドが1つでも表示の場合はグループも表示
-                        kintone.mobile.app.record.setFieldShown(fieldCode, true);
-                    } else {
-                        kintone.mobile.app.record.setFieldShown(fieldCode, false);
-                    }
-                } else if (beforeData === null) { // 初期表示（前項目がない場合）
-                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
-                } else if (beforeData[fieldCode] === undefined) {
-                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
-                } else if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
-                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
-                }
-            }
-        }
-
-        input(fieldCode) {
-            this.noInputs[fieldCode].shown = false;
-        }
-
-        empty(fieldCode) {
-            this.noInputs[fieldCode].shown = true;
-        }
-    }
-
     class Pager {
         constructor() {
             this.min = 0;
@@ -92,7 +36,7 @@ jQuery.noConflict();
         }
 
         isRequiredInputsPage(num) {
-            return (num === this.getRequiredInputsNum()) ? true : false;
+            return (num === this.getRequiredInputsNum());
         }
 
         getNoInputsNum() {
@@ -100,7 +44,7 @@ jQuery.noConflict();
         }
 
         isNoInputsPage(num) {
-            return (num === this.getNoInputsNum()) ? true : false;
+            return (num === this.getNoInputsNum());
         }
 
         getCurrentPage() {
@@ -147,8 +91,65 @@ jQuery.noConflict();
         }
     }
 
-    let form = new Form();
     let pager = new Pager();
+
+    class Form {
+        constructor() {
+            this.groupList = [];
+            this.noInputs = {};
+            this.requiredInputs = {};
+            this.showMode = false;
+        }
+
+        change(current, before) {
+            let currentData = [];
+            if (pager.isRequiredInputsPage(current) === true) {
+                currentData = this.requiredInputs;
+            } else if (pager.isNoInputsPage(current) === true) {
+                currentData = this.noInputs;
+            } else {
+                currentData = this.groupList[current];
+            }
+
+            let beforeData = [];
+            if (before === null) { // 初期表示（前項目がない場合）
+                beforeData = null;
+            } else if (pager.isRequiredInputsPage(before) === true) {
+                beforeData = this.requiredInputs;
+            } else if (pager.isNoInputsPage(before) === true) {
+                beforeData = this.noInputs;
+            } else {
+                beforeData = this.groupList[before];
+            }
+
+            for (let fieldCode of Object.keys(currentData)) {
+                if (currentData[fieldCode].fields !== undefined) { // グループフィールドの場合
+                    let shownList = currentData[fieldCode].fields.map((field) => currentData[field].shown);
+                    if (shownList.includes(true) === true) { // グループ配下のフィールドが1つでも表示の場合はグループも表示
+                        kintone.mobile.app.record.setFieldShown(fieldCode, true);
+                    } else {
+                        kintone.mobile.app.record.setFieldShown(fieldCode, false);
+                    }
+                } else if (beforeData === null) { // 初期表示（前項目がない場合）
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
+                } else if (beforeData[fieldCode] === undefined) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
+                } else if (currentData[fieldCode].shown !== beforeData[fieldCode].shown) {
+                    kintone.mobile.app.record.setFieldShown(fieldCode, currentData[fieldCode].shown);
+                }
+            }
+        }
+
+        input(fieldCode) {
+            this.noInputs[fieldCode].shown = false;
+        }
+
+        empty(fieldCode) {
+            this.noInputs[fieldCode].shown = true;
+        }
+    }
+
+    let form = new Form();
 
     let saveData = (fieldCode, value) => {
         if (pager.getShowMode() === false && value !== '' && value !== undefined) {
@@ -167,7 +168,7 @@ jQuery.noConflict();
             window.sv.saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
             form.input(fieldCode);
         }
-    }
+    };
 
     let saveDataNotWorkChangeEventField = () => {
         let record = kintone.mobile.app.record.get();
@@ -178,7 +179,7 @@ jQuery.noConflict();
             let value = record.record[fieldCode].value;
             saveData(fieldCode, value);
         });
-    }
+    };
 
     let nextColumn = () => {
         console.log('swipe right');
@@ -196,7 +197,7 @@ jQuery.noConflict();
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
         saveDataNotWorkChangeEventField();
-    }
+    };
 
     let prevColumn = () => {
         console.log('swipe left');
@@ -214,7 +215,7 @@ jQuery.noConflict();
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
         saveDataNotWorkChangeEventField();
-    }
+    };
 
     let nextRecord = () => {
         console.log('swipe up');
@@ -228,7 +229,7 @@ jQuery.noConflict();
             let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
             location.href = newUrl;
         }
-    }
+    };
 
     let prevRecord = () => {
         console.log('swipe down');
@@ -242,7 +243,7 @@ jQuery.noConflict();
             let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
             location.href = newUrl;
         }
-    }
+    };
 
     let getDirection = (x, y) => {
         let direction = '';
@@ -262,7 +263,7 @@ jQuery.noConflict();
         }
 
         return direction;
-    }
+    };
 
     let dragMoveListener = (event) => {
         let target = event.target;
@@ -277,7 +278,7 @@ jQuery.noConflict();
 
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
-    }
+    };
 
     let dragEndListener = (event) => {
         let target = event.target;
@@ -308,7 +309,7 @@ jQuery.noConflict();
 
         target.setAttribute('data-x', 0);
         target.setAttribute('data-y', 0);
-    }
+    };
 
     let showSwipeArea = (el) => {
         let html = '';
@@ -316,9 +317,15 @@ jQuery.noConflict();
         html += `<div id="${swipeElement}" style="background-image:url(${window.sv.imageFingerPrint});"></div>`;
         html += '</div>';
         $(el).append(html);
-    }
+    };
 
-    let restoreData = async (lsInputJson) => {
+    let changeData = (event) => {
+        let value = event.changes.field.value;
+        let fieldCode = event.type.replace(/.*\./, '');
+        saveData(fieldCode, value);
+    };
+
+    let restoreData = async(lsInputJson) => {
         let record = kintone.mobile.app.record.get();
         let inputRecords = lsInputJson.records;
 
@@ -339,14 +346,14 @@ jQuery.noConflict();
             record.record[fieldCode].value = inputRecords[fieldCode];
             form.input(fieldCode, pager.getNoInputsNum());
         }
-        kintone.events.off(changeEvent, changeData);
+        kintone.events.off(pluginConfig.changeEventList, changeData);
         kintone.mobile.app.record.set(record);
-        kintone.events.on(changeEvent, changeData);
-    }
+        kintone.events.on(pluginConfig.changeEventList, changeData);
+    };
 
     let removeData = () => {
         localStorage.removeItem(window.sv.getLsInputKey());
-    }
+    };
 
     let confirmRestore = (lsInputJson, lsInitialNum) => {
         let updatedTime = lsInputJson.updatedTime;
@@ -391,13 +398,7 @@ jQuery.noConflict();
                 }
             }
         });
-    }
-
-    let changeData = (event) => {
-        let value = event.changes.field.value;
-        let fieldCode = event.type.replace(/.*\./, '');
-        saveData(fieldCode, value);
-    }
+    };
 
 
 
@@ -430,14 +431,14 @@ jQuery.noConflict();
                     restriction: 'parent',
                     endOnly: false,
                     elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-                }),
+                })
             ],
             onmove: dragMoveListener,
             onend: dragEndListener
         });
 
         return event;
-    }
+    };
 
     let showSwipeViewForWrite = (event) => {
         if (event.type === 'mobile.app.record.create.show') {
@@ -481,14 +482,14 @@ jQuery.noConflict();
                     restriction: 'parent',
                     endOnly: false,
                     elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-                }),
+                })
             ],
             onmove: dragMoveListener,
             onend: dragEndListener
         });
 
         return event;
-    }
+    };
 
 
 
@@ -508,8 +509,7 @@ jQuery.noConflict();
 
 
 
-    let changeEvent = pluginConfig.changeEventList;
-    kintone.events.on(changeEvent, changeData);
+    kintone.events.on(pluginConfig.changeEventList, changeData);
 
 
 

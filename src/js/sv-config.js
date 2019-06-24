@@ -7,13 +7,13 @@ jQuery.noConflict();
 
     let getSettingsUrl = () => {
         return '/k/admin/app/flow?app=' + window.sv.appId;
-    }
+    };
 
     let insertToArray = (array, index, value) => {
         array.splice(index, 0, value);
-    }
+    };
 
-    let getFormFields = async () => {
+    let getFormFields = async() => {
         let res = await window.sv.kintoneApp.getFormLayout(window.sv.appId, true);
         let formLayoutList = res.layout;
 
@@ -59,7 +59,7 @@ jQuery.noConflict();
                     // グループ内フィールドに必須フィールドがあればグループを必須とする
                     let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
                     let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
-                    let underFieldList = fieldCodeListOneDim.map(fieldCode => fieldPropertyList[fieldCode]);
+                    let underFieldList = fieldCodeListOneDim.map(underFieldCode => fieldPropertyList[underFieldCode]);
                     for (let underField of underFieldList) {
                         itemList.push({
                             num: num++,
@@ -88,11 +88,11 @@ jQuery.noConflict();
                         if (noInputsFieldOptionList.includes(underField.type) === false) {
                             requiredInputs[underField.code] = {
                                 shown: underField.required
-                            }
+                            };
                         } else if (noInputsFieldOptionList.includes(underField.type) === true) {
                             requiredInputs[underField.code] = {
                                 shown: false
-                            }
+                            };
                         }
                     }
 
@@ -182,7 +182,7 @@ jQuery.noConflict();
         }
 
         return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent];
-    }
+    };
 
     let createValueNames = (columnList) => {
         let valueNames = ['num', 'code', 'label', 'type'];
@@ -191,7 +191,7 @@ jQuery.noConflict();
         }
 
         return valueNames;
-    }
+    };
 
     let createListHeader = (columnList) => {
         let item = '<tr>';
@@ -205,7 +205,7 @@ jQuery.noConflict();
         item += '</tr>';
 
         return item;
-    }
+    };
 
     let changeMinusButton = () => {
         let $minusButtonList = $('div#sv-list span.sv-minus');
@@ -215,7 +215,7 @@ jQuery.noConflict();
         } else if ($plusButtonList.length > 1) {
             $minusButtonList.removeClass('sv-display-none');
         }
-    }
+    };
 
     let createThColumn = (num) => {
         let html = '';
@@ -226,7 +226,7 @@ jQuery.noConflict();
         html += '</th>';
 
         return html;
-    }
+    };
 
     let saveButton = new kintoneUIComponent.Button({
         text: 'Save',
@@ -259,11 +259,11 @@ jQuery.noConflict();
 
             // プラグイン設定時と現在のフィールドコードのリストを作成
             let fieldCodeList = $.merge(Object.keys(groupList[0]), Object.keys(originalGroupList[0]));
-            let fieldCodeUniqueList = fieldCodeList.filter((ele, i) => fieldCodeList.indexOf(ele) === i);
+            let fieldCodeUniqueList = fieldCodeList.filter((ele, index) => fieldCodeList.indexOf(ele) === index);
 
             for (let j = 0; j < originalGroupList.length; j++) {
                 for (let fieldCode of fieldCodeUniqueList) {
-                    let item = itemList.find(item => item.code === fieldCode);
+                    let item = itemList.find(itemDetail => itemDetail.code === fieldCode);
 
                     if (item === undefined) { // プラグイン設定後にフィールドを削除した場合
                         delete originalGroupList[j][fieldCode];
@@ -293,6 +293,24 @@ jQuery.noConflict();
 
         changeMinusButton();
 
+        let searchList = () => {
+            let label = $('input#sv-search-label').val();
+            let code = $('input#sv-search-code').val();
+            let type = $('select#sv-search-type').val();
+
+            let regexpLabel = new RegExp(label);
+            let regexpCode = new RegExp(code);
+            let regexpType = new RegExp(type);
+
+            list.filter((item) => {
+                if (item.values().label.search(regexpLabel) !== -1
+                    && item.values().code.search(regexpCode) !== -1
+                    && item.values().type.search(regexpType) !== -1) {
+                    return true;
+                }
+            });
+        };
+
         // columntList = [0, 3, 2, 1]で2列目（4番目に追加された列）がクリックされた場合
         // groupListは1を取得したい（クリックされた列番号）
         // itemListは3を取得したい（クリックされた列番号の値）
@@ -317,7 +335,7 @@ jQuery.noConflict();
             // itemList
             let itemIndex = columnList[configIndex];
             let num = $($target.parents('tr').children('td')[0]).text();
-            let item = itemList.find(item => item.num === Number(num));
+            let item = itemList.find(itemDetail => itemDetail.num === Number(num));
             item[`column${itemIndex}`] = value;
         });
 
@@ -393,25 +411,6 @@ jQuery.noConflict();
             searchList();
         });
 
-        let searchList = () => {
-            let label = $('input#sv-search-label').val();
-            let code = $('input#sv-search-code').val();
-            let type = $('select#sv-search-type').val();
-
-            let regexpLabel = new RegExp(label);
-            let regexpCode = new RegExp(code);
-            let regexpType = new RegExp(type);
-
-            list.filter((item) => {
-                if (item.values().label.search(regexpLabel) !== -1
-                    && item.values().code.search(regexpCode) !== -1
-                    && item.values().type.search(regexpType) !== -1) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
         $(document).on('keyup', 'input#sv-search-code,input#sv-search-label', searchList);
         $(document).on('change', 'select#sv-search-type', searchList);
 

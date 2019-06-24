@@ -1,6 +1,22 @@
 ((PLUGIN_ID) => {
     'use strict';
 
+    const conn = new kintoneJSSDK.Connection();
+    const subdomain = window.location.hostname.split('.')[0];
+
+    const getAppId = () => {
+        let id = kintone.mobile.app.getId();
+        if (id === null) {
+            id = kintone.app.getId();
+        }
+
+        return id;
+    };
+    const appId = getAppId();
+
+    const lsListKey = `sv-${subdomain}-${appId}-list`; // 一覧画面のレコードID保存用
+    const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
+
     let pluginConfig = {};
     try {
         pluginConfig = kintone.plugin.app.getConfig(PLUGIN_ID);
@@ -43,14 +59,6 @@
         'LINK'
     ];
 
-    const getAppId = () => {
-        let id = kintone.mobile.app.getId();
-        if (id === null) {
-            id = kintone.app.getId();
-        }
-
-        return id;
-    }
 
     const pickLocalStorage = (key) => {
         let data = localStorage.getItem(key);
@@ -62,24 +70,25 @@
         }
 
         return result;
-    }
+    };
 
     const saveLocalStorage = (key, data) => {
         localStorage.setItem(key, JSON.stringify(data));
-    }
+    };
 
     // 新規/編集画面で入力したフィールドの保存用
     let lsInputKey = '';
     const setLsInputKey = (recordId) => {
         if (recordId === undefined) {
-            recordId = 0; // 新規画面の場合
+            lsInputKey = `sv-${subdomain}-${appId}-0-input`; // 新規画面の場合
+        } else {
+            lsInputKey = `sv-${subdomain}-${appId}-${recordId}-input`; // 編集画面の場合
         }
-        lsInputKey = `sv-${subdomain}-${appId}-${recordId}-input`;
-    }
+    };
 
     const getLsInputKey = () => {
         return lsInputKey;
-    }
+    };
 
     const getPrettyDate = (unixTimestamp) => {
         let date = new Date(unixTimestamp);
@@ -92,7 +101,7 @@
         let wNames = ['日', '月', '火', '水', '木', '金', '土'];
 
         return `${y}年${m}月${d}日 (${wNames[w]}) ${h}時${mm}分`;
-    }
+    };
 
     const isToday = (unixTimestamp1, unixTimestamp2) => {
         let date1 = new Date(unixTimestamp1);
@@ -104,8 +113,8 @@
         let d1 = date1.getDate();
         let d2 = date2.getDate();
 
-        return (y1 === y2 && m1 === m2 && d1 === d2) ? true : false;
-    }
+        return (y1 === y2 && m1 === m2 && d1 === d2);
+    };
 
     const isYesterday = (unixTimestamp1, unixTimestamp2) => {
         let date1 = new Date(unixTimestamp1);
@@ -117,15 +126,8 @@
         let d1 = date1.getDate();
         let d2 = date2.getDate();
 
-        return (y1 === y2 && m1 === m2 && Math.abs(d1 - d2) === 1) ? true : false;
-    }
-
-
-    const conn = new kintoneJSSDK.Connection();
-    const appId = getAppId();
-    const subdomain = window.location.hostname.split('.')[0];
-    const lsListKey = `sv-${subdomain}-${appId}-list`; // 一覧画面のレコードID保存用
-    const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
+        return (y1 === y2 && m1 === m2 && Math.abs(d1 - d2) === 1);
+    };
 
     window.sv = window.sv || {};
 
