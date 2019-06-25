@@ -2,8 +2,8 @@ jQuery.noConflict();
 (($) => {
     'use strict';
 
-    const swipeElement = 'sv-swipe-element';
-    const swipeArea = 'sv-swipe-area';
+    const swipeElementId = 'sv-swipe-element';
+    const swipeAreaId = 'sv-swipe-area';
     const pagerId = 'sv-pager';
 
     const pluginConfig = window.sv.pluginConfig;
@@ -268,7 +268,7 @@ jQuery.noConflict();
         let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
         let text = getDirection(x, y);
-        $(`div#${swipeArea}`).attr('data-value', text);
+        $(`div#${swipeAreaId}`).attr('data-value', text);
 
         target.style.webkitTransform = `translate(${x}px, ${y}px)`;
         target.style.transform = `translate(${x}px, ${y}px)`;
@@ -299,7 +299,7 @@ jQuery.noConflict();
             prevRecord();
         }
 
-        $(`div#${swipeArea}`).attr('data-value', '');
+        $(`div#${swipeAreaId}`).attr('data-value', '');
 
         target.style.webkitTransform = 'translate(0px, 0px)';
         target.style.transform = 'translate(0px, 0px)';
@@ -311,7 +311,7 @@ jQuery.noConflict();
     let showSwipeArea = (el) => {
         let html = '';
         html += '<div id="sv-swipe-area">';
-        html += `<img id="${swipeElement}" src="${window.sv.imageFingerPrint}" /></div>`;
+        html += `<img id="${swipeElementId}" src="${window.sv.imageFingerPrint}" /></div>`;
         html += '</div>';
         $(el).append(html);
     };
@@ -421,7 +421,7 @@ jQuery.noConflict();
 
         showSwipeArea(el);
 
-        interact(`#${swipeElement}`).draggable({
+        interact(`#${swipeElementId}`).draggable({
             inertia: true,
             modifiers: [
                 interact.modifiers.restrict({
@@ -472,7 +472,7 @@ jQuery.noConflict();
 
         showSwipeArea(el);
 
-        interact(`#${swipeElement}`).draggable({
+        interact(`#${swipeElementId}`).draggable({
             inertia: false,
             modifiers: [
                 interact.modifiers.restrict({
