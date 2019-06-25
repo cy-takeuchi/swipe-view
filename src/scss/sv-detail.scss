@@ -1,7 +1,7 @@
 $pager-base-color: #4b4b4b;
 
 div#sv-main {
-    border-bottom: 3px solid $pager-base-color;
+    border-bottom: 4px solid $pager-base-color;
 
     ul#sv-pager {
         display: inline-block;
@@ -10,7 +10,7 @@ div#sv-main {
 
         li {
             display: inline;
-            padding: 8px 12px 0px 12px;
+            padding: 8px 12px 3px 12px;
 
             a {
                 color: $pager-base-color;
