@@ -35,7 +35,7 @@ div#sv-swipe-element {
     z-index: 1000;
     background-color: #badc58;
     border-radius: 10px;
-    padding: 32px;
+    //padding: 32px;
     touch-action: none;
     user-select: none;
 
@@ -68,26 +68,26 @@ div#sv-swipe-area {
     pointer-events: none;
     z-index: 999;
     position: fixed;
-    bottom: 65px;
+    bottom: 80px;
     transform: translate3d(0, 0, 0);
     opacity: 0.6;
-    padding: 30px;
-    left: calc(192vw - 123px);
+    padding: 60px;
+    left: calc(192vw - 170px);
 
     @include mq(small, max) {
-        width: 15vw;
+        width: 16vw;
         height: 5vh;
     }
     @include mq(medium, max) {
-        width: 12vw;
+        width: 13vw;
         height: 7vh;
     }
     @include mq(large, max, true) {
-        width: 9vw;
+        width: 10vw;
         height: 8vh;
     }
     @include mq(large, min) {
-        width: 6vw;
+        width: 7vw;
         height: 8vh;
     }
 }
