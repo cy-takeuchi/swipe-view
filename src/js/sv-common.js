@@ -1,7 +1,6 @@
 ((PLUGIN_ID) => {
     'use strict';
 
-    const conn = new kintoneJSSDK.Connection();
     const subdomain = window.location.hostname.split('.')[0];
 
     const getAppId = () => {
@@ -136,8 +135,8 @@
     window.sv.noInputsFieldOptionList = noInputsFieldOptionList;
     window.sv.notWorkChangeEventFieldTypeList = notWorkChangeEventFieldTypeList;
 
-    window.sv.kintoneApp = new kintoneJSSDK.App(conn);
-    window.sv.kintoneRecord = new kintoneJSSDK.Record(conn);
+    window.sv.kintoneApp = new kintoneJSSDK.App();
+    window.sv.kintoneRecord = new kintoneJSSDK.Record();
     window.sv.appId = appId;
 
     window.sv.pickLocalStorage = pickLocalStorage;
