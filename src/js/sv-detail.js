@@ -3,6 +3,7 @@ jQuery.noConflict();
     'use strict';
 
     const swipeElement = 'sv-swipe-element';
+    const swipeArea = 'sv-swipe-area';
     const pagerId = 'sv-pager';
 
     const pluginConfig = window.sv.pluginConfig;
@@ -267,7 +268,7 @@ jQuery.noConflict();
         let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
         let text = getDirection(x, y);
-        target.setAttribute('data-value', text);
+        $(`div#${swipeArea}`).attr('data-value', text);
 
         target.style.webkitTransform = `translate(${x}px, ${y}px)`;
         target.style.transform = `translate(${x}px, ${y}px)`;
@@ -298,7 +299,7 @@ jQuery.noConflict();
             prevRecord();
         }
 
-        target.setAttribute('data-value', '');
+        $(`div#${swipeArea}`).attr('data-value', '');
 
         target.style.webkitTransform = 'translate(0px, 0px)';
         target.style.transform = 'translate(0px, 0px)';
