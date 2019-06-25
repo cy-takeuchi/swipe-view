@@ -243,19 +243,23 @@ jQuery.noConflict();
     };
 
     let getDirection = (x, y) => {
-        let direction = '';
+        let direction = {};
 
         if (Math.abs(x) > Math.abs(y) || pager.getShowMode() === false) {
             if (x >= 0) {
-                direction = 'right';
+                direction.course = 'right';
+                direction.message = '次の項目';
             } else if (x < 0) {
-                direction = 'left';
+                direction.course = 'left';
+                direction.message = '前の項目';
             }
         } else if (Math.abs(x) < Math.abs(y)) {
             if (y >= 0) {
-                direction = 'bottom';
+                direction.course = 'bottom';
+                direction.message = '次のレコード';
             } else if (y < 0) {
-                direction = 'top';
+                direction.course = 'top';
+                direction.message = '前のレコード';
             }
         }
 
@@ -267,8 +271,8 @@ jQuery.noConflict();
         let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
         let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-        let text = getDirection(x, y);
-        $(`div#${swipeAreaId}`).attr('data-value', text);
+        let direction = getDirection(x, y);
+        $(`div#${swipeAreaId}`).attr('data-value', direction.message);
 
         target.style.webkitTransform = `translate(${x}px, ${y}px)`;
         target.style.transform = `translate(${x}px, ${y}px)`;
@@ -288,14 +292,14 @@ jQuery.noConflict();
             return;
         }
 
-        let text = getDirection(x, y);
-        if (text === 'right') {
+        let direction = getDirection(x, y);
+        if (direction.course === 'right') {
             nextColumn();
-        } else if (text === 'left') {
+        } else if (direction.course === 'left') {
             prevColumn();
-        } else if (text === 'top') {
+        } else if (direction.course === 'top') {
             nextRecord();
-        } else if (text === 'bottom') {
+        } else if (direction.course === 'bottom') {
             prevRecord();
         }
 
