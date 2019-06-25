@@ -182,7 +182,6 @@ jQuery.noConflict();
     };
 
     let nextColumn = () => {
-        console.log('swipe right');
         let before = pager.getCurrentPage();
         let current = before + 1;
         if (current >= pager.getMax()) {
@@ -200,7 +199,6 @@ jQuery.noConflict();
     };
 
     let prevColumn = () => {
-        console.log('swipe left');
         let before = pager.getCurrentPage();
         let current = before - 1;
         if (current < 0) {
@@ -218,7 +216,6 @@ jQuery.noConflict();
     };
 
     let nextRecord = () => {
-        console.log('swipe up');
         let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
         let recordId = Number(match[2]);
         let index = window.sv.pickLocalStorage(window.sv.lsListKey).indexOf(recordId);
@@ -232,7 +229,6 @@ jQuery.noConflict();
     };
 
     let prevRecord = () => {
-        console.log('swipe down');
         let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
         let recordId = Number(match[2]);
         let index = window.sv.pickLocalStorage(window.sv.lsListKey).indexOf(recordId);
