@@ -8,6 +8,9 @@ jQuery.noConflict();
 
     const pluginConfig = window.sv.pluginConfig;
 
+    // changeイベントに対応していないフィールドが変更されたかどうかの判断用
+    let recordBeforeEdit = {};
+
     class Pager {
         constructor() {
             this.min = 0;
@@ -153,7 +156,7 @@ jQuery.noConflict();
     let form = new Form();
 
     let saveData = (fieldCode, value) => {
-        if (pager.getShowMode() === false && value !== '' && value !== undefined) {
+        if (value !== '' && value !== undefined) {
             let lsInputJson = window.sv.pickLocalStorage(window.sv.getLsInputKey());
             if (lsInputJson === null) {
                 lsInputJson = {
@@ -177,8 +180,9 @@ jQuery.noConflict();
         let fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
             window.sv.notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
         fieldCodeList.map((fieldCode) => {
-            let value = record.record[fieldCode].value;
-            saveData(fieldCode, value);
+            if (recordBeforeEdit[fieldCode].value !== record.record[fieldCode].value) {
+                saveData(fieldCode, record.record[fieldCode].value);
+            }
         });
     };
 
@@ -196,7 +200,9 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveDataNotWorkChangeEventField();
+        if (pager.getShowMode() === false) {
+            saveDataNotWorkChangeEventField();
+        }
     };
 
     let prevColumn = () => {
@@ -213,7 +219,9 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveDataNotWorkChangeEventField();
+        if (pager.getShowMode() === false) {
+            saveDataNotWorkChangeEventField();
+        }
     };
 
     let nextRecord = () => {
@@ -449,6 +457,8 @@ jQuery.noConflict();
     };
 
     let showSwipeViewForWrite = (event) => {
+        recordBeforeEdit = event.record;
+
         if (event.type === 'mobile.app.record.create.show') {
             window.sv.setLsInputKey(event.recordId);
         } else if (event.type === 'mobile.app.record.edit.show') {
@@ -543,7 +553,9 @@ jQuery.noConflict();
         pager.setCurrentPage(current);
 
         window.sv.saveLocalStorage(window.sv.lsInitialKey, current);
-        saveDataNotWorkChangeEventField();
+        if (pager.getShowMode() === false) {
+            saveDataNotWorkChangeEventField();
+        }
     });
 
 })(jQuery);
