@@ -243,9 +243,16 @@ jQuery.noConflict();
     };
 
     let getDirection = (x, y) => {
-        let direction = {};
+        let direction = {message: ''};
 
-        if (Math.abs(x) > Math.abs(y) || pager.getShowMode() === false) {
+        // 少しのスワイプで動作するのを防ぐ
+        if (Math.abs(x) < 30 && Math.abs(y) < 30) {
+            return direction;
+        }
+
+        if (Math.abs(x) > Math.abs(y)
+            // 編集画面はX軸のみ動作で、少しのスワイプで動作するのを防ぐ
+            || (pager.getShowMode() === false && Math.abs(x) > Math.abs(y) * 2)) {
             if (x >= 0) {
                 direction.course = 'right';
                 direction.message = '次の項目';
@@ -253,7 +260,7 @@ jQuery.noConflict();
                 direction.course = 'left';
                 direction.message = '前の項目';
             }
-        } else if (Math.abs(x) < Math.abs(y)) {
+        } else if (Math.abs(x) < Math.abs(y) && pager.getShowMode() === true) {
             if (y >= 0) {
                 direction.course = 'bottom';
                 direction.message = '次のレコード';
