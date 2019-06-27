@@ -22,9 +22,9 @@
         for (let key of Object.keys(pluginConfig)) {
             pluginConfig[key] = JSON.parse(pluginConfig[key]);
         }
-    } catch (e) {
-        console.log(`[ERROR]: ${e}`);
-        return;
+    } catch (err) {
+        console.log('[ERROR]', err);
+        throw new Error(err);
     }
 
     /*
