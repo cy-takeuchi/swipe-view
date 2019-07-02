@@ -11,10 +11,10 @@
     "build-css2": "node-sass src/scss/sv-config.scss src/css/sv-config.css --watch"
   },
   "devDependencies": {
-    "@kintone/plugin-packer": "^2.0.0",
-    "@kintone/plugin-uploader": "^3.0.0",
-    "eslint": "^5.16.0",
-    "eslint-config-kintone": "^1.3.0",
+    "@cybozu/eslint-config": "^5.1.1",
+    "@kintone/plugin-packer": "^2.0.1",
+    "@kintone/plugin-uploader": "^3.0.1",
+    "eslint": "^6.0.1",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5"
   }
