@@ -36,7 +36,11 @@ div#sv-list {
         }
     }
 
-    td.label, td.code, td.type {
+    td.label, td.code {
+        width: 150px;
+    }
+
+    td.type {
         width: 150px;
         white-space: nowrap;
     }
