@@ -60,7 +60,7 @@
 
 
   const pickLocalStorage = (key) => {
-    let data = localStorage.getItem(key);
+    const data = localStorage.getItem(key);
     let result = null;
     if (data !== null) {
       result = JSON.parse(data);
@@ -90,40 +90,40 @@
   };
 
   const getPrettyDate = (unixTimestamp) => {
-    let date = new Date(unixTimestamp);
-    let y = date.getFullYear();
-    let m = date.getMonth() + 1;
-    let d = date.getDate();
-    let w = date.getDay();
-    let h = date.getHours();
-    let mm = date.getMinutes();
-    let wNames = ['日', '月', '火', '水', '木', '金', '土'];
+    const date = new Date(unixTimestamp);
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    const w = date.getDay();
+    const h = date.getHours();
+    const mm = date.getMinutes();
+    const wNames = ['日', '月', '火', '水', '木', '金', '土'];
 
     return `${y}年${m}月${d}日 (${wNames[w]}) ${h}時${mm}分`;
   };
 
   const isToday = (unixTimestamp1, unixTimestamp2) => {
-    let date1 = new Date(unixTimestamp1);
-    let date2 = new Date(unixTimestamp2);
-    let y1 = date1.getFullYear();
-    let y2 = date2.getFullYear();
-    let m1 = date1.getMonth() + 1;
-    let m2 = date2.getMonth() + 1;
-    let d1 = date1.getDate();
-    let d2 = date2.getDate();
+    const date1 = new Date(unixTimestamp1);
+    const date2 = new Date(unixTimestamp2);
+    const y1 = date1.getFullYear();
+    const y2 = date2.getFullYear();
+    const m1 = date1.getMonth() + 1;
+    const m2 = date2.getMonth() + 1;
+    const d1 = date1.getDate();
+    const d2 = date2.getDate();
 
     return (y1 === y2 && m1 === m2 && d1 === d2);
   };
 
   const isYesterday = (unixTimestamp1, unixTimestamp2) => {
-    let date1 = new Date(unixTimestamp1);
-    let date2 = new Date(unixTimestamp2);
-    let y1 = date1.getFullYear();
-    let y2 = date2.getFullYear();
-    let m1 = date1.getMonth() + 1;
-    let m2 = date2.getMonth() + 1;
-    let d1 = date1.getDate();
-    let d2 = date2.getDate();
+    const date1 = new Date(unixTimestamp1);
+    const date2 = new Date(unixTimestamp2);
+    const y1 = date1.getFullYear();
+    const y2 = date2.getFullYear();
+    const m1 = date1.getMonth() + 1;
+    const m2 = date2.getMonth() + 1;
+    const d1 = date1.getDate();
+    const d2 = date2.getDate();
 
     return (y1 === y2 && m1 === m2 && Math.abs(d1 - d2) === 1);
   };
