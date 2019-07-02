@@ -12,6 +12,12 @@ jQuery.noConflict();
   const notWorkChangeEventFieldTypeList = window.sv.notWorkChangeEventFieldTypeList;
   const lsListKey = window.sv.lsListKey;
   const lsInitialKey = window.sv.lsInitialKey;
+  const setLsInputKey = window.sv.setLsInputKey;
+  const getLsInputKey = window.sv.getLsInputKey;
+  const imageFingerPrint = window.sv.imageFingerPrint;
+  const isToday = window.sv.isToday;
+  const isYesterday = window.sv.isYesterday;
+  const getPrettyDate = window.sv.getPrettyDate;
 
   // changeイベントに対応していないフィールドが変更されたかどうかの判断用
   let recordBeforeEdit = {};
@@ -162,7 +168,7 @@ jQuery.noConflict();
 
   const saveData = (fieldCode, value) => {
     if (value !== '' && value !== undefined) {
-      let lsInputJson = pickLocalStorage(window.sv.getLsInputKey());
+      let lsInputJson = pickLocalStorage(getLsInputKey());
       if (lsInputJson === null) {
         lsInputJson = {
           updatedTime: new Date().getTime(),
@@ -174,15 +180,15 @@ jQuery.noConflict();
         lsInputJson.updatedTime = new Date().getTime();
         lsInputJson.records[fieldCode] = value;
       }
-      saveLocalStorage(window.sv.getLsInputKey(), lsInputJson);
+      saveLocalStorage(getLsInputKey(), lsInputJson);
       form.input(fieldCode);
     }
   };
 
   const saveDataNotWorkChangeEventField = () => {
-    let record = kintone.mobile.app.record.get();
+    const record = kintone.mobile.app.record.get();
 
-    let fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
+    const fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
       notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
     for (let fieldCode of fieldCodeList) {
       if (recordBeforeEdit[fieldCode].value !== record.record[fieldCode].value) {
@@ -192,8 +198,8 @@ jQuery.noConflict();
   };
 
   const nextColumn = () => {
-    let before = pager.getCurrentPage();
-    let current = before + 1;
+    const before = pager.getCurrentPage();
+    const current = before + 1;
     if (current >= pager.getMax()) {
       return;
     }
@@ -211,8 +217,8 @@ jQuery.noConflict();
   };
 
   const prevColumn = () => {
-    let before = pager.getCurrentPage();
-    let current = before - 1;
+    const before = pager.getCurrentPage();
+    const current = before - 1;
     if (current < 0) {
       return;
     }
@@ -230,27 +236,27 @@ jQuery.noConflict();
   };
 
   const nextRecord = () => {
-    let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    let recordId = Number(match[2]);
-    let index = pickLocalStorage(lsListKey).indexOf(recordId);
-    let nextRecordId = pickLocalStorage(lsListKey)[index + 1];
+    const match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+    const recordId = Number(match[2]);
+    const index = pickLocalStorage(lsListKey).indexOf(recordId);
+    const nextRecordId = pickLocalStorage(lsListKey)[index + 1];
     if (nextRecordId !== undefined) {
       // 選択している項目を次レコードの初期値として利用する
       saveLocalStorage(lsInitialKey, pager.getCurrentPage());
-      let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+      const newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
       location.href = newUrl;
     }
   };
 
   const prevRecord = () => {
-    let match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    let recordId = Number(match[2]);
-    let index = pickLocalStorage(lsListKey).indexOf(recordId);
-    let nextRecordId = pickLocalStorage(lsListKey)[index - 1];
+    const match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+    const recordId = Number(match[2]);
+    const index = pickLocalStorage(lsListKey).indexOf(recordId);
+    const nextRecordId = pickLocalStorage(lsListKey)[index - 1];
     if (nextRecordId !== undefined) {
       // 選択している項目を次レコードの初期値として利用する
       saveLocalStorage(lsInitialKey, pager.getCurrentPage());
-      let newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+      const newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
       location.href = newUrl;
     }
   };
@@ -287,11 +293,11 @@ jQuery.noConflict();
   };
 
   const dragMoveListener = (event) => {
-    let target = event.target;
-    let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-    let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+    const target = event.target;
+    const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-    let direction = getDirection(x, y);
+    const direction = getDirection(x, y);
     $(`div#${swipeAreaId}`).attr('data-value', direction.message);
 
     target.style.webkitTransform = `translate(${x}px, ${y}px)`;
@@ -302,9 +308,9 @@ jQuery.noConflict();
   };
 
   const dragEndListener = (event) => {
-    let target = event.target;
-    let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-    let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+    const target = event.target;
+    const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+    const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
     // デバッグ用
     // $(`ul#${pagerId}`).parent().append(`<br />${x}:${y}`);
@@ -312,7 +318,7 @@ jQuery.noConflict();
       return;
     }
 
-    let direction = getDirection(x, y);
+    const direction = getDirection(x, y);
     if (direction.course === 'right') {
       nextColumn();
     } else if (direction.course === 'left') {
@@ -335,20 +341,20 @@ jQuery.noConflict();
   const showSwipeArea = (el) => {
     let html = '';
     html += '<div id="sv-swipe-area">';
-    html += `<img id="${swipeElementId}" src="${window.sv.imageFingerPrint}" /></div>`;
+    html += `<img id="${swipeElementId}" src="${imageFingerPrint}" /></div>`;
     html += '</div>';
     $(el).append(html);
   };
 
   const changeData = (event) => {
-    let value = event.changes.field.value;
-    let fieldCode = event.type.replace(/.*\./, '');
+    const value = event.changes.field.value;
+    const fieldCode = event.type.replace(/.*\./, '');
     saveData(fieldCode, value);
   };
 
   const restoreData = async (lsInputJson) => {
-    let record = kintone.mobile.app.record.get();
-    let inputRecords = lsInputJson.records;
+    const record = kintone.mobile.app.record.get();
+    const inputRecords = lsInputJson.records;
 
     for (let fieldCode of Object.keys(inputRecords)) {
       // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
@@ -373,26 +379,26 @@ jQuery.noConflict();
   };
 
   const removeData = () => {
-    localStorage.removeItem(window.sv.getLsInputKey());
+    localStorage.removeItem(getLsInputKey());
   };
 
   const confirmRestore = (lsInputJson, lsInitialNum) => {
-    let updatedTime = lsInputJson.updatedTime;
-    let now = new Date().getTime();
-    let diff = (now - updatedTime) / 1000;
+    const updatedTime = lsInputJson.updatedTime;
+    const now = new Date().getTime();
+    const diff = (now - updatedTime) / 1000;
 
     let content = '';
     if (diff < 60 * 60) {
       content += '先程入力していたデータがあります。<br />';
-    } else if (window.sv.isToday(now, updatedTime) === true) {
+    } else if (isToday(now, updatedTime) === true) {
       content += '本日入力していたデータがあります。<br />';
-    } else if (window.sv.isYesterday(now, updatedTime) === true) {
+    } else if (isYesterday(now, updatedTime) === true) {
       content += '昨日入力していたデータがあります。<br />';
     } else {
       content += '入力途中のデータがあります。<br />';
     }
     content += 'リストアしますか？<br />';
-    content += `入力日時: ${window.sv.getPrettyDate(updatedTime)}`;
+    content += `入力日時: ${getPrettyDate(updatedTime)}`;
 
     $.confirm({
       title: false,
@@ -423,7 +429,7 @@ jQuery.noConflict();
 
 
   const showSwipeViewForRead = (event) => {
-    let el = kintone.mobile.app.getHeaderSpaceElement();
+    const el = kintone.mobile.app.getHeaderSpaceElement();
 
     pager.setShowMode(true);
 
@@ -464,12 +470,12 @@ jQuery.noConflict();
     recordBeforeEdit = event.record;
 
     if (event.type === 'mobile.app.record.create.show') {
-      window.sv.setLsInputKey(event.recordId);
+      setLsInputKey(event.recordId);
     } else if (event.type === 'mobile.app.record.edit.show') {
-      window.sv.setLsInputKey(event.recordId);
+      setLsInputKey(event.recordId);
     }
 
-    let el = kintone.mobile.app.getHeaderSpaceElement();
+    const el = kintone.mobile.app.getHeaderSpaceElement();
 
     pager.setShowMode(false);
 
@@ -488,7 +494,7 @@ jQuery.noConflict();
     pager.active(lsInitialNum);
     pager.setCurrentPage(lsInitialNum);
 
-    let lsInputJson = pickLocalStorage(window.sv.getLsInputKey());
+    const lsInputJson = pickLocalStorage(getLsInputKey());
     if (lsInputJson !== null) { // 未入力項目への反映はリストアしてから
       confirmRestore(lsInputJson, lsInitialNum);
     } else {
@@ -540,8 +546,8 @@ jQuery.noConflict();
 
 
   $(document).on('click', `ul#${pagerId} li`, (event) => {
-    let before = pager.getCurrentPage();
-    let current = $(event.currentTarget).index();
+    const before = pager.getCurrentPage();
+    const current = $(event.currentTarget).index();
 
     form.change(current, before);
 
