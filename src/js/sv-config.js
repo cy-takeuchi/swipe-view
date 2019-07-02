@@ -4,21 +4,24 @@ jQuery.noConflict();
 
   const originalPluginConfig = window.sv.pluginConfig;
   const noInputsFieldOptionList = window.sv.noInputsFieldOptionList;
+  const kintoneApp = window.sv.kintoneApp;
+  const appId = window.sv.appId;
+  const notCoveredFieldTypeList = window.sv.notCoveredFieldTypeList;
 
-  let getSettingsUrl = () => {
-    return '/k/admin/app/flow?app=' + window.sv.appId;
+  const getSettingsUrl = () => {
+    return `/k/admin/app/flow?app=${appId}`;
   };
 
-  let insertToArray = (array, index, value) => {
+  const insertToArray = (array, index, value) => {
     array.splice(index, 0, value);
   };
 
-  let getFormFields = async () => {
-    let res = await window.sv.kintoneApp.getFormLayout(window.sv.appId, true);
-    let formLayoutList = res.layout;
+  const getFormFields = async () => {
+    let res = await kintoneApp.getFormLayout(appId, true);
+    const formLayoutList = res.layout;
 
-    res = await window.sv.kintoneApp.getFormFields(window.sv.appId, 'DEFAULT', true);
-    let fieldPropertyList = res.properties;
+    res = await kintoneApp.getFormFields(appId, 'DEFAULT', true);
+    const fieldPropertyList = res.properties;
 
     /*
      * itemListは表（プラグイン設定画面の見た目）のデータ
@@ -43,7 +46,7 @@ jQuery.noConflict();
     let fieldCodeListForChangeEvent = [];
 
     for (let formLayout of formLayoutList) {
-      let rowType = formLayout.type;
+      const rowType = formLayout.type;
       // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
       // サブテーブルはサブテーブル配下の必須入力状態でrequiredを設定したい
       if (rowType === 'GROUP') {
@@ -160,7 +163,7 @@ jQuery.noConflict();
         let fieldList = formLayout.fields;
         for (let j = 0; j < fieldList.length; j++) {
           let fieldType = fieldList[j].type;
-          if (window.sv.notCoveredFieldTypeList.includes(fieldType) === true) {
+          if (notCoveredFieldTypeList.includes(fieldType) === true) {
             continue;
           }
 
@@ -203,7 +206,7 @@ jQuery.noConflict();
     return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent];
   };
 
-  let createValueNames = (columnList) => {
+  const createValueNames = (columnList) => {
     let valueNames = ['num', 'code', 'label', 'type'];
     for (let column of columnList) {
       valueNames.push(`column${column}`);
@@ -212,7 +215,7 @@ jQuery.noConflict();
     return valueNames;
   };
 
-  let createListHeader = (columnList) => {
+  const createListHeader = (columnList) => {
     let item = '<tr>';
     item += '<td class="num sv-display-none"></td>';
     item += '<td class="label"></td>';
@@ -226,7 +229,7 @@ jQuery.noConflict();
     return item;
   };
 
-  let changeMinusButton = () => {
+  const changeMinusButton = () => {
     let $minusButtonList = $('div#sv-list span.sv-minus');
     let $plusButtonList = $('div#sv-list span.sv-plus');
     if ($minusButtonList.length === 1) {
@@ -236,10 +239,10 @@ jQuery.noConflict();
     }
   };
 
-  let createThColumn = (num) => {
+  const createThColumn = (num) => {
     let html = '';
     html += '<th nowrap>';
-    html += num + '<br />';
+    html += `${num}<br />`;
     html += '<span class="sv-plus">+</span>';
     html += '<span class="sv-minus">-</span>';
     html += '</th>';
@@ -247,11 +250,11 @@ jQuery.noConflict();
     return html;
   };
 
-  let saveButton = new kintoneUIComponent.Button({
+  const kUiSaveButton = new kintoneUIComponent.Button({
     text: 'Save',
     type: 'submit'
   });
-  $('div#sv-save').append(saveButton.render());
+  $('div#sv-save').append(kUiSaveButton.render());
 
   getFormFields().then((array) => {
     let itemList = array[0];
@@ -435,7 +438,7 @@ jQuery.noConflict();
     $(document).on('keyup', 'input#sv-search-code,input#sv-search-label', searchList);
     $(document).on('change', 'select#sv-search-type', searchList);
 
-    saveButton.on('click', (e) => {
+    kUiSaveButton.on('click', (e) => {
       e.preventDefault();
 
       let newPluginConfig = {};
