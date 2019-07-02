@@ -42,90 +42,103 @@ jQuery.noConflict();
      */
     let fieldCodeListForChangeEvent = [];
 
-    for (let i of Object.keys(formLayoutList)) {
-      let formLayout = formLayoutList[i];
+    for (let formLayout of formLayoutList) {
       let rowType = formLayout.type;
-      if (rowType === 'GROUP' || rowType === 'SUBTABLE') {
-        // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
-        // サブテーブルはサブテーブル配下の必須入力状態でrequiredを設定したい
+      // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
+      // サブテーブルはサブテーブル配下の必須入力状態でrequiredを設定したい
+      if (rowType === 'GROUP') {
         let fieldCode = formLayout.code;
-        let fieldProperty = fieldPropertyList[fieldCode];
-
-        let fieldLabel = '';
+        let fieldLabel = fieldPropertyList[fieldCode].label;
         let fieldRequired = false;
-        if (rowType === 'GROUP') {
-          fieldLabel = fieldProperty.label;
 
-          noInputs[fieldCode] = {
-            fields: []
-          };
+        noInputs[fieldCode] = {
+          fields: []
+        };
 
-          // グループ内フィールドに必須フィールドがあればグループを必須とする
-          let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
-          let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
-          let underFieldList = fieldCodeListOneDim.map(underFieldCode => fieldPropertyList[underFieldCode]);
-          for (let underField of underFieldList) {
-            itemList.push({
-              num: num++,
-              label: underField.label,
-              code: underField.code,
-              type: underField.type,
-              column0: '×',
-              underGroup: true
-            });
+        let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
+        let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
+        let underFieldList = fieldCodeListOneDim.map(underFieldCode => fieldPropertyList[underFieldCode]);
+        for (let underField of underFieldList) {
+          itemList.push({
+            num: num++,
+            label: underField.label,
+            code: underField.code,
+            type: underField.type,
+            column0: '×',
+            underGroup: true
+          });
 
-            groupList[0][underField.code] = {
-              shown: true
-            };
-
-            // noInputsFieldOptionListの場合、.requiredはundefinedになる
-            if (underField.required === true) {
-              fieldRequired = true;
-            }
-
-            noInputs[fieldCode].fields.push(underField.code);
-            noInputs[underField.code] = {
-              shown: !noInputsFieldOptionList.includes(underField.type),
-              group: fieldCode
-            };
-
-            if (noInputsFieldOptionList.includes(underField.type) === false) {
-              requiredInputs[underField.code] = {
-                shown: underField.required
-              };
-            } else if (noInputsFieldOptionList.includes(underField.type) === true) {
-              requiredInputs[underField.code] = {
-                shown: false
-              };
-            }
-          }
-
-          for (let row of formLayout.layout) {
-            for (let field of row.fields) {
-              if (noInputsFieldOptionList.includes(field.type) === false) {
-                fieldCodeListForChangeEvent.push(field.code);
-              }
-            }
-          }
-        } else if (rowType === 'SUBTABLE') {
-          // サブテーブルはラベルがないのでサブテーブルとする
-          fieldLabel = 'サブテーブル';
-
-          noInputs[fieldCode] = {
+          groupList[0][underField.code] = {
             shown: true
           };
 
-          // サブテーブル内フィールドに必須フィールドがあればサブテーブルを必須とする
-          let underFieldList = fieldProperty.fields;
-          for (let underFieldCode of Object.keys(underFieldList)) {
-            if (underFieldList[underFieldCode].required === true) {
-              fieldRequired = true;
-              break;
-            }
+          // グループ内フィールドに必須フィールドがあればグループを必須とする
+          if (underField.required === true) {
+            fieldRequired = true;
           }
 
-          fieldCodeListForChangeEvent.push(fieldCode);
+          noInputs[fieldCode].fields.push(underField.code);
+          noInputs[underField.code] = {
+            shown: !noInputsFieldOptionList.includes(underField.type),
+            group: fieldCode
+          };
+
+          if (noInputsFieldOptionList.includes(underField.type) === false) {
+            requiredInputs[underField.code] = {
+              shown: underField.required
+            };
+          } else if (noInputsFieldOptionList.includes(underField.type) === true) {
+            requiredInputs[underField.code] = {
+              shown: false
+            };
+          }
         }
+
+        for (let row of formLayout.layout) {
+          for (let field of row.fields) {
+            if (noInputsFieldOptionList.includes(field.type) === false) {
+              fieldCodeListForChangeEvent.push(field.code);
+            }
+          }
+        }
+
+        itemList.push({
+          num: num++,
+          label: fieldLabel,
+          code: fieldCode,
+          type: rowType,
+          column0: '×',
+          underGroup: false
+        });
+
+        groupList[0][fieldCode] = {
+          shown: false
+        };
+
+        requiredInputs[fieldCode] = {
+          shown: fieldRequired
+        };
+      } else if (rowType === 'SUBTABLE') {
+        let fieldCode = formLayout.code;
+
+        // サブテーブルはラベルがないのでサブテーブルとする
+        let fieldLabel = 'サブテーブル';
+        let fieldRequired = false;
+
+        noInputs[fieldCode] = {
+          shown: true
+        };
+
+        // サブテーブル内フィールドに必須フィールドがあればサブテーブルを必須とする
+        let underFieldList = fieldPropertyList[fieldCode].fields;
+        for (let underFieldCode of Object.keys(underFieldList)) {
+          if (underFieldList[underFieldCode].required === true) {
+            fieldRequired = true;
+            break;
+          }
+        }
+
+        fieldCodeListForChangeEvent.push(fieldCode);
 
         itemList.push({
           num: num++,
