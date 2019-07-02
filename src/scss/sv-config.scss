@@ -1,47 +1,47 @@
 div#sv-list {
 
-    input#sv-search-label {
-        width: 120px;
+  input#sv-search-label {
+    width: 120px;
+  }
+
+  input#sv-search-code {
+    width: 120px;
+  }
+
+  span {
+    &.sv-plus {
+      cursor: pointer;
     }
 
-    input#sv-search-code {
-        width: 120px;
+    &.sv-minus {
+      cursor: pointer;
     }
+  }
 
-    span {
-        &.sv-plus {
-            cursor: pointer;
-        }
+  th {
+    padding: 8px 16px;
+    text-align: center;
+  }
 
-        &.sv-minus {
-            cursor: pointer;
-        }
+  td {
+    padding: 8px 16px;
+
+    div {
+      padding: 8px 16px;
+      cursor: pointer;
     }
+  }
 
-    th {
-        padding: 8px 16px;
-        text-align: center;
-    }
+  td.label, td.code {
+    width: 150px;
+  }
 
-    td {
-        padding: 8px 16px;
+  td.type {
+    width: 150px;
+    white-space: nowrap;
+  }
 
-        div {
-            padding: 8px 16px;
-            cursor: pointer;
-        }
-    }
-
-    td.label, td.code {
-        width: 150px;
-    }
-
-    td.type {
-        width: 150px;
-        white-space: nowrap;
-    }
-
-    .sv-display-none {
-        display: none;
-    }
+  .sv-display-none {
+    display: none;
+  }
 }
