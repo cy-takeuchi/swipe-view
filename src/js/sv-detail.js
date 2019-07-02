@@ -179,11 +179,12 @@ jQuery.noConflict();
 
     let fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
       window.sv.notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
-    fieldCodeList.map((fieldCode) => {
+    for (let fieldCode of fieldCodeList) {
       if (recordBeforeEdit[fieldCode].value !== record.record[fieldCode].value) {
+        console.log('save', fieldCode);
         saveData(fieldCode, record.record[fieldCode].value);
       }
-    });
+    }
   };
 
   let nextColumn = () => {

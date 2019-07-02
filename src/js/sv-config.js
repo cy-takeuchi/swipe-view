@@ -100,11 +100,13 @@ jQuery.noConflict();
             }
           }
 
-          formLayout.layout.map(row => row.fields.map(field => {
-            if (noInputsFieldOptionList.includes(field.type) === false) {
-              fieldCodeListForChangeEvent.push(field.code);
+          for (let row of formLayout.layout) {
+            for (let field of row.fields) {
+              if (noInputsFieldOptionList.includes(field.type) === false) {
+                fieldCodeListForChangeEvent.push(field.code);
+              }
             }
-          }));
+          }
         } else if (rowType === 'SUBTABLE') {
           // サブテーブルはラベルがないのでサブテーブルとする
           fieldLabel = 'サブテーブル';
@@ -248,7 +250,8 @@ jQuery.noConflict();
 
     let originalGroupList = originalPluginConfig.svGroupList;
 
-    let columnNum = 0, columnList = [];
+    let columnNum = 0;
+    let columnList = [];
     if (originalGroupList === undefined) { // プラグイン未設定の場合
       columnNum = 0;
       columnList = [columnNum];
@@ -312,6 +315,7 @@ jQuery.noConflict();
           && item.values().type.search(regexpType) !== -1) {
           return true;
         }
+        return false;
       });
     };
 
