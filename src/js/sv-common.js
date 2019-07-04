@@ -14,6 +14,7 @@
   const appId = getAppId();
 
   const lsListKey = `sv-${subdomain}-${appId}-list`; // 一覧画面のレコードID保存用
+  const lsQueryKey = `sv-${subdomain}-${appId}-query`; // 一覧画面のクエリー保存用
   const lsInitialKey = `sv-${subdomain}-${appId}-initial`; // 詳細画面の項目番号保存用
 
   let pluginConfig = {};
@@ -142,6 +143,7 @@
   window.sv.pickLocalStorage = pickLocalStorage;
   window.sv.saveLocalStorage = saveLocalStorage;
   window.sv.lsListKey = lsListKey;
+  window.sv.lsQueryKey = lsQueryKey;
   window.sv.lsInitialKey = lsInitialKey;
   window.sv.setLsInputKey = setLsInputKey;
   window.sv.getLsInputKey = getLsInputKey;

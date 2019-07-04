@@ -7,10 +7,13 @@ jQuery.noConflict();
   const pagerId = 'sv-pager';
 
   const pluginConfig = window.sv.pluginConfig;
+  const kintoneRecord = window.sv.kintoneRecord;
+  const appId = window.sv.appId;
   const pickLocalStorage = window.sv.pickLocalStorage;
   const saveLocalStorage = window.sv.saveLocalStorage;
   const notWorkChangeEventFieldTypeList = window.sv.notWorkChangeEventFieldTypeList;
   const lsListKey = window.sv.lsListKey;
+  const lsQueryKey = window.sv.lsQueryKey;
   const lsInitialKey = window.sv.lsInitialKey;
   const setLsInputKey = window.sv.setLsInputKey;
   const getLsInputKey = window.sv.getLsInputKey;
@@ -197,6 +200,11 @@ jQuery.noConflict();
     }
   };
 
+  const getNextPageRecords = async (query) => {
+    const res = await kintoneRecord.getRecords(appId, query, ['$id']);
+    return res.records.map((record) => Number(record.$id.value)).reverse();
+  };
+
   const nextColumn = () => {
     const before = pager.getCurrentPage();
     const current = before + 1;
@@ -235,28 +243,61 @@ jQuery.noConflict();
     }
   };
 
-  const nextRecord = () => {
-    const match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    const recordId = Number(match[2]);
-    const index = pickLocalStorage(lsListKey).indexOf(recordId);
-    const nextRecordId = pickLocalStorage(lsListKey)[index + 1];
-    if (nextRecordId !== undefined) {
+  const prevRecord = () => {
+    const recordList = pickLocalStorage(lsListKey);
+    const recordMatch = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+    const recordId = Number(recordMatch[2]);
+    const index = recordList.indexOf(recordId);
+    const prevRecordId = recordList[index + 1];
+    if (prevRecordId === undefined && index + 1 === recordList.length) {
+      const query = pickLocalStorage(lsQueryKey);
+      const offsetMatch = query.match(/(offset )(\d+)/); // ブラウザがlookbehind対応していない
+      const prevPageQuery = query.replace(/offset \d+/, `offset ${Number(offsetMatch[2]) - 50}`);
+      getNextPageRecords(prevPageQuery).then((prevPageRecords) => {
+        // 選択している項目を次レコードの初期値として利用する
+        saveLocalStorage(lsInitialKey, pager.getCurrentPage());
+
+        saveLocalStorage(lsListKey, prevPageRecords);
+        saveLocalStorage(lsQueryKey, prevPageQuery);
+
+        const prevPageRecordId = prevPageRecords[0];
+        const newUrl = location.href.replace(/(record=)\d+/, `record=${prevPageRecordId}`);
+        location.href = newUrl;
+      });
+    } else if (prevRecordId !== undefined) {
       // 選択している項目を次レコードの初期値として利用する
       saveLocalStorage(lsInitialKey, pager.getCurrentPage());
-      const newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+      const newUrl = location.href.replace(/(record=)\d+/, `record=${prevRecordId}`);
       location.href = newUrl;
     }
   };
 
-  const prevRecord = () => {
-    const match = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    const recordId = Number(match[2]);
-    const index = pickLocalStorage(lsListKey).indexOf(recordId);
-    const nextRecordId = pickLocalStorage(lsListKey)[index - 1];
-    if (nextRecordId !== undefined) {
+  const nextRecord = () => {
+    const recordList = pickLocalStorage(lsListKey);
+    const recordMatch = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+    const recordId = Number(recordMatch[2]);
+    const index = recordList.indexOf(recordId);
+    const nextRecordId = recordList[index - 1];
+    if (nextRecordId === undefined && index === 0) {
+      const query = pickLocalStorage(lsQueryKey);
+      const offsetMatch = query.match(/(offset )(\d+)/); // ブラウザがlookbehind対応していない
+      const nextPageQuery = query.replace(/offset \d+/, `offset ${Number(offsetMatch[2]) + 50}`);
+      getNextPageRecords(nextPageQuery).then((nextPageRecords) => {
+        // 選択している項目を次レコードの初期値として利用する
+        saveLocalStorage(lsInitialKey, pager.getCurrentPage());
+
+        saveLocalStorage(lsListKey, nextPageRecords);
+        saveLocalStorage(lsQueryKey, nextPageQuery);
+
+        const nextPageRecordId = nextPageRecords[nextPageRecords.length - 1];
+        const newUrl = location.href.replace(/(record=)\d+/, `record=${nextPageRecordId}`);
+        location.href = newUrl;
+      });
+    } else if (nextRecordId !== undefined) {
       // 選択している項目を次レコードの初期値として利用する
       saveLocalStorage(lsInitialKey, pager.getCurrentPage());
-      const newUrl = location.href.replace(/(record=)\d+/, 'record=' + nextRecordId);
+
+      const newUrl = location.href.replace(/(record=)\d+/, `record=${nextRecordId}`);
       location.href = newUrl;
     }
   };
@@ -324,9 +365,9 @@ jQuery.noConflict();
     } else if (direction.course === 'left') {
       prevColumn();
     } else if (direction.course === 'top') {
-      nextRecord();
-    } else if (direction.course === 'bottom') {
       prevRecord();
+    } else if (direction.course === 'bottom') {
+      nextRecord();
     }
 
     $(`div#${swipeAreaId}`).attr('data-value', '');
