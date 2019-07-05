@@ -243,16 +243,25 @@ jQuery.noConflict();
     }
   };
 
+  const pickupRecordId = (string) => {
+    const match = string.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
+    return Number(match[2]);
+  };
+
+  const pickupOffset = (string) => {
+    const match = string.match(/(offset )(\d+)/); // ブラウザがlookbehind対応していない
+    return Number(match[2]);
+  };
+
   const prevRecord = () => {
     const recordList = pickLocalStorage(lsListKey);
-    const recordMatch = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    const recordId = Number(recordMatch[2]);
+    const recordId = pickupRecordId(location.href);
     const index = recordList.indexOf(recordId);
     const prevRecordId = recordList[index + 1];
     if (prevRecordId === undefined && index + 1 === recordList.length) {
       const query = pickLocalStorage(lsQueryKey);
-      const offsetMatch = query.match(/(offset )(\d+)/); // ブラウザがlookbehind対応していない
-      const prevPageQuery = query.replace(/offset \d+/, `offset ${Number(offsetMatch[2]) - 50}`);
+      const offset = pickupOffset(query);
+      const prevPageQuery = query.replace(/offset \d+/, `offset ${offset - 50}`);
       getNextPageRecords(prevPageQuery).then((prevPageRecords) => {
         // 選択している項目を次レコードの初期値として利用する
         saveLocalStorage(lsInitialKey, pager.getCurrentPage());
@@ -274,14 +283,13 @@ jQuery.noConflict();
 
   const nextRecord = () => {
     const recordList = pickLocalStorage(lsListKey);
-    const recordMatch = location.href.match(/(record=)(\d+)/); // ブラウザがlookbehind対応していない
-    const recordId = Number(recordMatch[2]);
+    const recordId = pickupRecordId(location.href);
     const index = recordList.indexOf(recordId);
     const nextRecordId = recordList[index - 1];
     if (nextRecordId === undefined && index === 0) {
       const query = pickLocalStorage(lsQueryKey);
-      const offsetMatch = query.match(/(offset )(\d+)/); // ブラウザがlookbehind対応していない
-      const nextPageQuery = query.replace(/offset \d+/, `offset ${Number(offsetMatch[2]) + 50}`);
+      const offset = pickupOffset(query);
+      const nextPageQuery = query.replace(/offset \d+/, `offset ${offset + 50}`);
       getNextPageRecords(nextPageQuery).then((nextPageRecords) => {
         // 選択している項目を次レコードの初期値として利用する
         saveLocalStorage(lsInitialKey, pager.getCurrentPage());
