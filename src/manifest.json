@@ -8,7 +8,7 @@
     "css": [
     ]
   },
-  "icon": "image/icon.png",
+  "icon": "image/door_hikido.png",
   "config": {
     "html": "html/config.html",
     "js": [
