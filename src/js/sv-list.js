@@ -2,8 +2,16 @@
   'use strict';
 
   const saveLocalStorage = window.sv.saveLocalStorage;
+  const kintoneRecord = window.sv.kintoneRecord;
+  const appId = window.sv.appId;
   const lsListKey = window.sv.lsListKey;
   const lsQueryKey = window.sv.lsQueryKey;
+  const lsCountKey = window.sv.lsCountKey;
+
+  const getTotalCount = async () => {
+    const res = await kintoneRecord.getRecords(appId, '$id > 0 limit 1', ['$id'], true);
+    return Number(res.totalCount);
+  };
 
   const indexShowEventList = [
     'mobile.app.record.index.show'
@@ -26,6 +34,10 @@
 
     const query = `${kintone.mobile.app.getQuery()} limit 50 offset ${offset}`;
     saveLocalStorage(lsQueryKey, query);
+
+    getTotalCount().then((count) => {
+      saveLocalStorage(lsCountKey, count);
+    });
   });
 
 })();

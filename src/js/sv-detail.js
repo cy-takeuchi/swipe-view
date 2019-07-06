@@ -14,6 +14,7 @@ jQuery.noConflict();
   const notWorkChangeEventFieldTypeList = window.sv.notWorkChangeEventFieldTypeList;
   const lsListKey = window.sv.lsListKey;
   const lsQueryKey = window.sv.lsQueryKey;
+  const lsCountKey = window.sv.lsCountKey;
   const lsInitialKey = window.sv.lsInitialKey;
   const setLsInputKey = window.sv.setLsInputKey;
   const getLsInputKey = window.sv.getLsInputKey;
@@ -498,6 +499,24 @@ jQuery.noConflict();
     form.change(lsInitialNum, null);
 
     showSwipeArea(el);
+
+    // 一番前のレコードの場合は前のレコードに遷移できなくする
+    const recordList = pickLocalStorage(lsListKey);
+    const recordId = pickupRecordId(location.href);
+    const index = recordList.indexOf(recordId);
+    const prevRecordId = recordList[index + 1];
+    const query = pickLocalStorage(lsQueryKey);
+    const offset = pickupOffset(query);
+    if (prevRecordId === undefined && offset === 0) {
+      $(`#${swipeElementId}`).css('margin-top', '0px');
+    }
+
+    // 一番後のレコードの場合は後のレコードに遷移できなくする
+    const count = pickLocalStorage(lsCountKey);
+    const nextRecordId = recordList[index - 1];
+    if (nextRecordId === undefined && count <= offset + 50) {
+      $(`#${swipeElementId}`).css('margin-bottom', '0px');
+    }
 
     interact(`#${swipeElementId}`).draggable({
       inertia: true,

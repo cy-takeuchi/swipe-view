@@ -17,14 +17,6 @@ div#sv-main {
         color: #ffffff;
         font-weight: bold; }
 
-img#sv-swipe-element {
-  pointer-events: auto;
-  z-index: 1000;
-  background-color: #badc58;
-  border-radius: 30px;
-  touch-action: none;
-  user-select: none; }
-
 div#sv-swipe-area {
   pointer-events: none;
   z-index: 999;
@@ -32,8 +24,7 @@ div#sv-swipe-area {
   bottom: 80px;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
-  padding: 60px;
-  left: calc(192vw - 170px); }
+  left: calc(192vw - 180px); }
   div#sv-swipe-area::before {
     content: attr(data-value);
     position: absolute;
@@ -41,19 +32,22 @@ div#sv-swipe-area {
     left: -0.5em;
     font-size: 1.7em;
     font-weight: bold; }
-  @media screen and (max-width: 480px) {
-    div#sv-swipe-area {
-      width: 16vw;
-      height: 5vh; } }
-  @media screen and (max-width: 600px) {
-    div#sv-swipe-area {
-      width: 13vw;
-      height: 7vh; } }
-  @media screen and (max-width: 959px) {
-    div#sv-swipe-area {
-      width: 10vw;
-      height: 8vh; } }
+
+img#sv-swipe-element {
+  pointer-events: auto;
+  z-index: 1000;
+  border-radius: 30px;
+  touch-action: none;
+  user-select: none; }
   @media screen and (min-width: 960px) {
-    div#sv-swipe-area {
-      width: 7vw;
-      height: 8vh; } }
+    img#sv-swipe-element {
+      margin: 60px; } }
+  @media screen and (max-width: 959px) {
+    img#sv-swipe-element {
+      margin: 54px; } }
+  @media screen and (max-width: 600px) {
+    img#sv-swipe-element {
+      margin: 48px; } }
+  @media screen and (max-width: 480px) {
+    img#sv-swipe-element {
+      margin: 42px; } }

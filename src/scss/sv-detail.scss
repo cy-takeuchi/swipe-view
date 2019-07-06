@@ -30,13 +30,23 @@ div#sv-main {
   }
 }
 
-img#sv-swipe-element {
-  pointer-events: auto;
-  z-index: 1000;
-  background-color: #badc58;
-  border-radius: 30px;
-  touch-action: none;
-  user-select: none;
+div#sv-swipe-area {
+  pointer-events: none;
+  z-index: 999;
+  position: fixed;
+  bottom: 80px;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.6;
+  left: calc(192vw - 180px);
+
+  &::before {
+    content: attr(data-value);
+    position: absolute;
+    top: -1.5em;
+    left: -0.5em;
+    font-size: 1.7em;
+    font-weight: bold;
+  }
 }
 
 $mq-breakpoints: (
@@ -48,46 +58,30 @@ $mq-breakpoints: (
 @mixin mq($breakpoint: medium, $rule: min, $subtraction: false) {
   $breakpoint: map_get($mq-breakpoints, $breakpoint);
   @if $rule == max and $subtraction {
-  $breakpoint: $breakpoint - 1;
+    $breakpoint: $breakpoint - 1;
   }
   @media screen and (#{$rule}-width: $breakpoint) {
   @content;
   }
 }
 
-div#sv-swipe-area {
-  pointer-events: none;
-  z-index: 999;
-  position: fixed;
-  bottom: 80px;
-  transform: translate3d(0, 0, 0);
-  opacity: 0.6;
-  padding: 60px;
-  left: calc(192vw - 170px);
+img#sv-swipe-element {
+  pointer-events: auto;
+  z-index: 1000;
+  border-radius: 30px;
+  touch-action: none;
+  user-select: none;
 
-  &::before {
-    content: attr(data-value);
-    position: absolute;
-    top: -1.5em;
-    left: -0.5em;
-    font-size: 1.7em;
-    font-weight: bold;
-  }
-
-  @include mq(small, max) {
-    width: 16vw;
-    height: 5vh;
-  }
-  @include mq(medium, max) {
-    width: 13vw;
-    height: 7vh;
+  @include mq(large, min) {
+    margin: 60px;
   }
   @include mq(large, max, true) {
-    width: 10vw;
-    height: 8vh;
+    margin: 54px;
   }
-  @include mq(large, min) {
-    width: 7vw;
-    height: 8vh;
+  @include mq(medium, max) {
+    margin: 48px;
+  }
+  @include mq(small, max) {
+    margin: 42px;
   }
 }
