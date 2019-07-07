@@ -254,7 +254,7 @@ jQuery.noConflict();
     text: 'Save',
     type: 'submit'
   });
-  $('div#sv-save').append(kUiSaveButton.render());
+  $('div#sv-save-button').append(kUiSaveButton.render());
 
   getFormFields().then((array) => {
     let itemList = array[0];
