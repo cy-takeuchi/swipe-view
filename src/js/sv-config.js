@@ -45,7 +45,7 @@ jQuery.noConflict();
      */
     let fieldCodeListForChangeEvent = [];
 
-    for (let formLayout of formLayoutList) {
+    for (const formLayout of formLayoutList) {
       const rowType = formLayout.type;
       // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
       // サブテーブルはサブテーブル配下の必須入力状態でrequiredを設定したい
@@ -61,7 +61,7 @@ jQuery.noConflict();
         let fieldCodeListTwoDim = formLayout.layout.map(row => row.fields.map(field => field.code));
         let fieldCodeListOneDim = [].concat(...fieldCodeListTwoDim);
         let underFieldList = fieldCodeListOneDim.map(underFieldCode => fieldPropertyList[underFieldCode]);
-        for (let underField of underFieldList) {
+        for (const underField of underFieldList) {
           itemList.push({
             num: num++,
             label: underField.label,
@@ -97,8 +97,8 @@ jQuery.noConflict();
           }
         }
 
-        for (let row of formLayout.layout) {
-          for (let field of row.fields) {
+        for (const row of formLayout.layout) {
+          for (const field of row.fields) {
             if (noInputsFieldOptionList.includes(field.type) === false) {
               fieldCodeListForChangeEvent.push(field.code);
             }
@@ -134,7 +134,7 @@ jQuery.noConflict();
 
         // サブテーブル内フィールドに必須フィールドがあればサブテーブルを必須とする
         let underFieldList = fieldPropertyList[fieldCode].fields;
-        for (let underFieldCode of Object.keys(underFieldList)) {
+        for (const underFieldCode of Object.keys(underFieldList)) {
           if (underFieldList[underFieldCode].required === true) {
             fieldRequired = true;
             break;
@@ -161,13 +161,13 @@ jQuery.noConflict();
         };
       } else if (rowType === 'ROW') {
         let fieldList = formLayout.fields;
-        for (let j = 0; j < fieldList.length; j++) {
-          let fieldType = fieldList[j].type;
+        for (const field of fieldList) {
+          let fieldType = field.type;
           if (notCoveredFieldTypeList.includes(fieldType) === true) {
             continue;
           }
 
-          let fieldCode = fieldList[j].code;
+          let fieldCode = field.code;
           let fieldProperty = fieldPropertyList[fieldCode];
           let fieldLabel = fieldProperty.label;
           let fieldRequired = fieldProperty.required;
@@ -208,7 +208,7 @@ jQuery.noConflict();
 
   const createValueNames = (columnList) => {
     let valueNames = ['num', 'code', 'label', 'type'];
-    for (let column of columnList) {
+    for (const column of columnList) {
       valueNames.push(`column${column}`);
     }
 
@@ -221,7 +221,7 @@ jQuery.noConflict();
     item += '<td class="label"></td>';
     item += '<td class="code"></td>';
     item += '<td class="type"></td>';
-    for (let column of columnList) {
+    for (const column of columnList) {
       item += `<td><div class="column${column}"></div></td>`;
     }
     item += '</tr>';
@@ -230,8 +230,8 @@ jQuery.noConflict();
   };
 
   const changeMinusButton = () => {
-    let $minusButtonList = $('div#sv-list span.sv-minus');
-    let $plusButtonList = $('div#sv-list span.sv-plus');
+    const $minusButtonList = $('div#sv-list span.sv-minus');
+    const $plusButtonList = $('div#sv-list span.sv-plus');
     if ($minusButtonList.length === 1) {
       $minusButtonList.addClass('sv-display-none');
     } else if ($plusButtonList.length > 1) {
@@ -257,12 +257,7 @@ jQuery.noConflict();
   $('div#sv-save-button').append(kUiSaveButton.render());
 
   getFormFields().then((array) => {
-    let itemList = array[0];
-    let groupList = array[1];
-    let noInputs = array[2];
-    let requiredInputs = array[3];
-
-    let fieldCodeListForChangeEvent = array[4];
+    let [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent] = array;
 
     let originalGroupList = originalPluginConfig.svGroupList;
 
@@ -281,24 +276,24 @@ jQuery.noConflict();
       columnNum = i - 1;
 
       // プラグイン設定時と現在のフィールドコードのリストを作成
-      let fieldCodeList = $.merge(Object.keys(groupList[0]), Object.keys(originalGroupList[0]));
-      let fieldCodeUniqueList = fieldCodeList.filter((ele, index) => fieldCodeList.indexOf(ele) === index);
+      const fieldCodeList = $.merge(Object.keys(groupList[0]), Object.keys(originalGroupList[0]));
+      const fieldCodeUniqueList = fieldCodeList.filter((ele, index) => fieldCodeList.indexOf(ele) === index);
 
-      for (let j = 0; j < originalGroupList.length; j++) {
-        for (let fieldCode of fieldCodeUniqueList) {
+      for (const [index, originalGroup] of originalGroupList.entries()) {
+        for (const fieldCode of fieldCodeUniqueList) {
           let item = itemList.find(itemDetail => itemDetail.code === fieldCode);
 
           if (item === undefined) { // プラグイン設定後にフィールドを削除した場合
-            delete originalGroupList[j][fieldCode];
+            delete originalGroup[fieldCode];
           } else if (item.underGroup === true) { // グループ配下のフィールドの場合
-            originalGroupList[j][fieldCode] = {shown: true};
-          } else if (originalGroupList[j][fieldCode] === undefined) { // プラグイン設定後にフィールドを追加した場合
-            originalGroupList[j][fieldCode] = {shown: false};
-            item[`column${j}`] = '×';
-          } else if (originalGroupList[j][fieldCode].shown === true) {
-            item[`column${j}`] = '〇';
-          } else if (originalGroupList[j][fieldCode].shown === false) {
-            item[`column${j}`] = '×';
+            originalGroup[fieldCode] = {shown: true};
+          } else if (originalGroup[fieldCode] === undefined) { // プラグイン設定後にフィールドを追加した場合
+            originalGroup[fieldCode] = {shown: false};
+            item[`column${index}`] = '×';
+          } else if (originalGroup[fieldCode].shown === true) {
+            item[`column${index}`] = '〇';
+          } else if (originalGroup[fieldCode].shown === false) {
+            item[`column${index}`] = '×';
           }
         }
       }
@@ -316,14 +311,14 @@ jQuery.noConflict();
 
     changeMinusButton();
 
-    let searchList = () => {
-      let label = $('input#sv-search-label').val();
-      let code = $('input#sv-search-code').val();
-      let type = $('select#sv-search-type').val();
+    const searchList = () => {
+      const label = $('input#sv-search-label').val();
+      const code = $('input#sv-search-code').val();
+      const type = $('select#sv-search-type').val();
 
-      let regexpLabel = new RegExp(label);
-      let regexpCode = new RegExp(code);
-      let regexpType = new RegExp(type);
+      const regexpLabel = new RegExp(label);
+      const regexpCode = new RegExp(code);
+      const regexpType = new RegExp(type);
 
       list.filter((item) => {
         if (item.values().label.search(regexpLabel) !== -1
@@ -339,8 +334,8 @@ jQuery.noConflict();
     // groupListは1を取得したい（クリックされた列番号）
     // itemListは3を取得したい（クリックされた列番号の値）
     $(document).on('click', 'div#sv-list td div', (e) => {
-      let $target = $(e.currentTarget);
-      let configIndex = $target.parent('td')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
+      const $target = $(e.currentTarget);
+      const configIndex = $target.parent('td')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
 
       let shown = true;
       let value = '〇';
@@ -353,13 +348,13 @@ jQuery.noConflict();
       $target.text(value);
 
       // groupList
-      let fieldCode = $($target.parents('tr').children('td')[2]).text();
+      const fieldCode = $($target.parents('tr').children('td')[2]).text();
       groupList[configIndex][fieldCode] = {shown: shown};
 
       // itemList
-      let itemIndex = columnList[configIndex];
-      let num = $($target.parents('tr').children('td')[0]).text();
-      let item = itemList.find(itemDetail => itemDetail.num === Number(num));
+      const itemIndex = columnList[configIndex];
+      const num = $($target.parents('tr').children('td')[0]).text();
+      const item = itemList.find(itemDetail => itemDetail.num === Number(num));
       item[`column${itemIndex}`] = value;
     });
 
@@ -376,18 +371,18 @@ jQuery.noConflict();
 
       columnNum++;
 
-      let $target = $(e.currentTarget);
+      const $target = $(e.currentTarget);
 
       // テーブルヘッダー
       $target.parent('th').after(createThColumn(columnNum));
       changeMinusButton();
 
       // 何列目がクリックされたか
-      let index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
+      const index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
 
       // groupList
       insertToArray(groupList, index + 1, $.extend(true, {}, groupList[index]));
-      for (let fieldCode of Object.keys(groupList[index + 1])) {
+      for (const fieldCode of Object.keys(groupList[index + 1])) {
         groupList[index + 1][fieldCode].shown = false; // groupListの初期化
       }
 
@@ -408,12 +403,12 @@ jQuery.noConflict();
     $(document).on('click', 'span.sv-minus', (e) => {
       list.clear();
 
-      let $target = $(e.currentTarget);
+      const $target = $(e.currentTarget);
 
       // 何列目がクリックされたか
-      let index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
+      const index = $target.parent('th')[0].cellIndex - 4; // 設定項目列の前に4列存在するため
 
-      let itemIndex = columnList[index];
+      const itemIndex = columnList[index];
 
       // テーブルヘッダー
       $target.parent('th').remove();
@@ -441,13 +436,13 @@ jQuery.noConflict();
     kUiSaveButton.on('click', (e) => {
       e.preventDefault();
 
-      let newPluginConfig = {};
+      const newPluginConfig = {};
       newPluginConfig.svGroupList = JSON.stringify(groupList);
       newPluginConfig.svNoInputs = JSON.stringify(noInputs);
       newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
 
-      let changeEventList = [];
-      for (let fieldCodeForChangeEvent of fieldCodeListForChangeEvent) {
+      const changeEventList = [];
+      for (const fieldCodeForChangeEvent of fieldCodeListForChangeEvent) {
         changeEventList.push(`mobile.app.record.create.change.${fieldCodeForChangeEvent}`);
         changeEventList.push(`mobile.app.record.edit.change.${fieldCodeForChangeEvent}`);
       }

@@ -194,7 +194,7 @@ jQuery.noConflict();
 
     const fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
       notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
-    for (let fieldCode of fieldCodeList) {
+    for (const fieldCode of fieldCodeList) {
       if (recordBeforeEdit[fieldCode].value !== record.record[fieldCode].value) {
         saveData(fieldCode, record.record[fieldCode].value);
       }
@@ -406,16 +406,16 @@ jQuery.noConflict();
     const record = kintone.mobile.app.record.get();
     const inputRecords = lsInputJson.records;
 
-    for (let fieldCode of Object.keys(inputRecords)) {
+    for (const fieldCode of Object.keys(inputRecords)) {
       // ローカルルストレージ保存時に、テーブルの空フィールドはvalueプロパティが削除される
       if (Array.isArray(inputRecords[fieldCode]) === true
         && inputRecords[fieldCode].length > 0
         && inputRecords[fieldCode][0].id !== undefined) {
-        let table = inputRecords[fieldCode];
-        for (let i = 0; i < table.length; i++) {
-          for (let key of Object.keys(table[i].value)) {
-            if (table[i].value[key].value === undefined) {
-              table[i].value[key].value = '';
+        const table = inputRecords[fieldCode];
+        for (const tableRow of table) {
+          for (const key of Object.keys(tableRow.value)) {
+            if (tableRow.value[key].value === undefined) {
+              tableRow.value[key].value = '';
             }
           }
         }
