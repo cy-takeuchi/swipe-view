@@ -202,6 +202,21 @@ jQuery.noConflict();
         }
       }
     }
+    console.log('koko1', fieldCodeListForChangeEvent);
+
+    let mappingFieldList = [];
+    for (const fieldCode of Object.keys(fieldPropertyList)) {
+      const fieldProperty = fieldPropertyList[fieldCode];
+
+      if (fieldProperty.lookup !== undefined) {
+        for (const fieldMapping of fieldProperty.lookup.fieldMappings) {
+          mappingFieldList.push(fieldMapping.field);
+        }
+      }
+    }
+
+    // ルックアップフィールドのコピー先フィールドを除外する
+    fieldCodeListForChangeEvent = fieldCodeListForChangeEvent.filter((fieldCode) => mappingFieldList.indexOf(fieldCode) === -1);
 
     return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent];
   };
