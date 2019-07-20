@@ -45,6 +45,11 @@ jQuery.noConflict();
      */
     let fieldCodeListForChangeEvent = [];
 
+    /*
+    * changeイベントが発動しないので項目移動時に保存するフィールドコード
+    */
+    let notWorkChangeEventFieldCodeList = [];
+
     for (const formLayout of formLayoutList) {
       const rowType = formLayout.type;
       // グループ内フィールドはグループ配下と分かる状態で一覧に追加したい
@@ -202,13 +207,13 @@ jQuery.noConflict();
         }
       }
     }
-    console.log('koko1', fieldCodeListForChangeEvent);
 
     let mappingFieldList = [];
     for (const fieldCode of Object.keys(fieldPropertyList)) {
       const fieldProperty = fieldPropertyList[fieldCode];
 
       if (fieldProperty.lookup !== undefined) {
+        notWorkChangeEventFieldCodeList.push(fieldProperty.code);
         for (const fieldMapping of fieldProperty.lookup.fieldMappings) {
           mappingFieldList.push(fieldMapping.field);
         }
@@ -218,7 +223,7 @@ jQuery.noConflict();
     // ルックアップフィールドのコピー先フィールドを除外する
     fieldCodeListForChangeEvent = fieldCodeListForChangeEvent.filter((fieldCode) => mappingFieldList.indexOf(fieldCode) === -1);
 
-    return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent];
+    return [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent, notWorkChangeEventFieldCodeList];
   };
 
   const createValueNames = (columnList) => {
@@ -272,7 +277,7 @@ jQuery.noConflict();
   $('div#sv-save-button').append(kUiSaveButton.render());
 
   getFormFields().then((array) => {
-    let [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent] = array;
+    let [itemList, groupList, noInputs, requiredInputs, fieldCodeListForChangeEvent, notWorkChangeEventFieldCodeList] = array;
 
     let originalGroupList = originalPluginConfig.svGroupList;
 
@@ -455,6 +460,7 @@ jQuery.noConflict();
       newPluginConfig.svGroupList = JSON.stringify(groupList);
       newPluginConfig.svNoInputs = JSON.stringify(noInputs);
       newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
+      newPluginConfig.notWorkChangeEventFieldCodeList= JSON.stringify(notWorkChangeEventFieldCodeList);
 
       const changeEventList = [];
       for (const fieldCodeForChangeEvent of fieldCodeListForChangeEvent) {

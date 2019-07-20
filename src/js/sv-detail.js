@@ -192,9 +192,10 @@ jQuery.noConflict();
   const saveDataNotWorkChangeEventField = () => {
     const record = kintone.mobile.app.record.get();
 
-    const fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
+    let fieldCodeList = Object.keys(record.record).filter((fieldCode) =>
       notWorkChangeEventFieldTypeList.includes(record.record[fieldCode].type));
-    for (const fieldCode of fieldCodeList) {
+    const allFieldCodeList = fieldCodeList.concat(pluginConfig.notWorkChangeEventFieldCodeList);
+    for (const fieldCode of allFieldCodeList) {
       if (recordBeforeEdit[fieldCode].value !== record.record[fieldCode].value) {
         saveData(fieldCode, record.record[fieldCode].value);
       }
