@@ -460,7 +460,7 @@ jQuery.noConflict();
       newPluginConfig.svGroupList = JSON.stringify(groupList);
       newPluginConfig.svNoInputs = JSON.stringify(noInputs);
       newPluginConfig.svRequiredInputs = JSON.stringify(requiredInputs);
-      newPluginConfig.notWorkChangeEventFieldCodeList= JSON.stringify(notWorkChangeEventFieldCodeList);
+      newPluginConfig.notWorkChangeEventFieldCodeList = JSON.stringify(notWorkChangeEventFieldCodeList);
 
       const changeEventList = [];
       for (const fieldCodeForChangeEvent of fieldCodeListForChangeEvent) {
