@@ -23,7 +23,7 @@ div#sv-swipe-area {
   position: fixed;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
-  top: 60vh;
+  bottom: 15vh;
   left: 60vw; }
   div#sv-swipe-area::before {
     content: attr(data-value);

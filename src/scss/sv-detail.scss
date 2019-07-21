@@ -36,9 +36,7 @@ div#sv-swipe-area {
   position: fixed;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
-  //left: calc(192vw - 180px);
-  //bottom: 120px;
-  top: 60vh;
+  bottom: 15vh;
   left: 60vw;
 
   &::before {
