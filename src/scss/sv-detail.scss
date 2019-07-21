@@ -34,7 +34,7 @@ div#sv-swipe-area {
   pointer-events: none;
   z-index: 999;
   position: fixed;
-  bottom: 80px;
+  bottom: 120px;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
   left: calc(192vw - 180px);
@@ -61,7 +61,7 @@ $mq-breakpoints: (
     $breakpoint: $breakpoint - 1;
   }
   @media screen and (#{$rule}-width: $breakpoint) {
-  @content;
+    @content;
   }
 }
 

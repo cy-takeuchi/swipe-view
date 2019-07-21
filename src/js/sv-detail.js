@@ -520,7 +520,7 @@ jQuery.noConflict();
     }
 
     interact(`#${swipeElementId}`).draggable({
-      inertia: true,
+      inertia: false,
       modifiers: [
         interact.modifiers.restrict({
           restriction: 'parent',
