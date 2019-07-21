@@ -34,10 +34,12 @@ div#sv-swipe-area {
   pointer-events: none;
   z-index: 999;
   position: fixed;
-  bottom: 120px;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
-  left: calc(192vw - 180px);
+  //left: calc(192vw - 180px);
+  //bottom: 120px;
+  top: 60vh;
+  left: 60vw;
 
   &::before {
     content: attr(data-value);
