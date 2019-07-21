@@ -8,6 +8,10 @@
   const lsQueryKey = window.sv.lsQueryKey;
   const lsCountKey = window.sv.lsCountKey;
 
+  const getRecords = (query) => {
+    return kintoneRecord.getRecords(appId, query);
+  };
+
   const getTotalCount = async () => {
     const res = await kintoneRecord.getRecords(appId, '$id > 0 limit 1', ['$id'], true);
     return Number(res.totalCount);
@@ -17,14 +21,13 @@
     'mobile.app.record.index.show'
   ];
   kintone.events.on(indexShowEventList, (event) => {
-    const records = event.records;
-
-    let recordIdList = [];
-    for (let record of records) {
-      recordIdList.unshift(Number(record.$id.value));
-    }
-
-    saveLocalStorage(lsListKey, recordIdList);
+    getRecords(kintone.mobile.app.getQueryCondition()).then((res) => {
+      let recordIdList = [];
+      for (const record of res.records) {
+        recordIdList.unshift(Number(record.$id.value));
+      }
+      saveLocalStorage(lsListKey, recordIdList);
+    });
 
     const match = location.href.match(/(#offset=)(\d+)/); // ブラウザがlookbehind対応していない
     let offset = 0;
@@ -38,6 +41,8 @@
     getTotalCount().then((count) => {
       saveLocalStorage(lsCountKey, count);
     });
+
+    return event;
   });
 
 })();
