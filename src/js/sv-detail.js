@@ -390,7 +390,6 @@ jQuery.noConflict();
   };
 
   const showSwipeArea = (el, showMode) => {
-    console.log('showMode', showMode);
     let html = '';
     if (showMode === true) {
       html += '<div id="sv-swipe-area" class="sv-swipe-area-read">';
