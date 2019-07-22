@@ -389,9 +389,14 @@ jQuery.noConflict();
     target.setAttribute('data-y', 0);
   };
 
-  const showSwipeArea = (el) => {
+  const showSwipeArea = (el, showMode) => {
+    console.log('showMode', showMode);
     let html = '';
-    html += '<div id="sv-swipe-area">';
+    if (showMode === true) {
+      html += '<div id="sv-swipe-area" class="sv-swipe-area-read">';
+    } else {
+      html += '<div id="sv-swipe-area" class="sv-swipe-area-write">';
+    }
     html += `<img id="${swipeElementId}" src="${imageFingerPrint}" /></div>`;
     html += '</div>';
     $(el).append(html);
@@ -499,7 +504,7 @@ jQuery.noConflict();
     pager.setCurrentPage(lsInitialNum);
     form.change(lsInitialNum, null);
 
-    showSwipeArea(el);
+    showSwipeArea(el, pager.getShowMode());
 
     // 一番前のレコードの場合は前のレコードに遷移できなくする
     const recordList = pickLocalStorage(lsListKey);
@@ -570,7 +575,7 @@ jQuery.noConflict();
       form.change(lsInitialNum, null);
     }
 
-    showSwipeArea(el);
+    showSwipeArea(el, pager.getShowMode());
 
     interact(`#${swipeElementId}`).draggable({
       inertia: false,

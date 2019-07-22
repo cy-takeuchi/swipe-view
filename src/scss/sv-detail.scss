@@ -37,7 +37,14 @@ div#sv-swipe-area {
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
   bottom: 15vh;
-  left: 60vw;
+
+  &.sv-swipe-area-read {
+    left: 60vw;
+  }
+
+  &.sv-swipe-area-write {
+    right: 100vw;
+  }
 
   &::before {
     content: attr(data-value);

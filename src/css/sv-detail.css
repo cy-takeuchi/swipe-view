@@ -23,8 +23,11 @@ div#sv-swipe-area {
   position: fixed;
   transform: translate3d(0, 0, 0);
   opacity: 0.6;
-  bottom: 15vh;
-  left: 60vw; }
+  bottom: 15vh; }
+  div#sv-swipe-area.sv-swipe-area-read {
+    left: 60vw; }
+  div#sv-swipe-area.sv-swipe-area-write {
+    right: 100vw; }
   div#sv-swipe-area::before {
     content: attr(data-value);
     position: absolute;
