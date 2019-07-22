@@ -11,10 +11,12 @@ div#sv-list {
   span {
     &.sv-plus {
       cursor: pointer;
+      padding: 4px;
     }
 
     &.sv-minus {
       cursor: pointer;
+      padding: 4px;
     }
   }
 

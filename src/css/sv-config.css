@@ -5,10 +5,12 @@ div#sv-list input#sv-search-code {
   width: 120px; }
 
 div#sv-list span.sv-plus {
-  cursor: pointer; }
+  cursor: pointer;
+  padding: 4px; }
 
 div#sv-list span.sv-minus {
-  cursor: pointer; }
+  cursor: pointer;
+  padding: 4px; }
 
 div#sv-list th {
   padding: 8px 16px;
